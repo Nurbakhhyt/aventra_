@@ -28,23 +28,31 @@ class Tour extends Model
         return $this->belongsTo(User::class);
     }
 
-//    public function bookings()
-//    {
-//        return $this->hasMany(Booking::class);
-//    }
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 
     public function images()
     {
         return $this->hasMany(TourImage::class);
     }
 
-    public function decreaseVolume(int $purchasedSeats)
+
+    public function decreaseVolume(int $seats): void
     {
-        if ($this->volume < $purchasedSeats) {
-            throw new \Exception('Not enough seats available for this tour.');
+        if ($this->volume < $seats) {
+            throw new \Exception('Недостаточно мест для уменьшения.');
         }
 
-        $this->volume -= $purchasedSeats;
+        $this->volume -= $seats;
         $this->save();
     }
+
+    public function increaseVolume(int $seats): void
+    {
+        $this->volume += $seats;
+        $this->save();
+    }
+
 }

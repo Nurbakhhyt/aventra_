@@ -17,9 +17,17 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Filament\Facades\Filament;
 
 class AdminPanelPanelProvider extends PanelProvider
 {
+
+    public function boot(): void
+    {
+        Filament::serving(function () {
+
+        });
+    }
     public function panel(Panel $panel): Panel
     {
         return $panel
@@ -53,6 +61,7 @@ class AdminPanelPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                \App\Http\Middleware\CanAccessAdminPanel::class,
             ]);
     }
 }
