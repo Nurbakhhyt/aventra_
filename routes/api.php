@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\FavoriteTourController;
+use App\Http\Controllers\ReviewController;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -32,6 +34,8 @@ Route::Resource('locations', LocationController::class);
 // API маршруты для работы с турами
 Route::Resource('tours', TourController::class);
 
+Route::Resource('reviews', ReviewController::class);
+Route::Resource('favorites', FavoriteTourController::class);
 // Маршруты для бронирования (доступные только для авторизованных пользователей)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');

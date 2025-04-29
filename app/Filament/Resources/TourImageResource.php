@@ -18,7 +18,7 @@ class TourImageResource extends Resource
 {
     protected static ?string $model = TourImage::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-camera'; // Иконка "фото"
+    protected static ?string $navigationIcon = 'heroicon-o-photo'; // Иконка "фото"
     protected static ?string $navigationGroup = 'Администрирование';
 
     public static function form(Form $form): Form

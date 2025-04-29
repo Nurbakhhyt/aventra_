@@ -38,6 +38,9 @@ class Tour extends Model
         return $this->hasMany(TourImage::class);
     }
 
+    public function favoriteTours(){
+        return $this->belongsToMany(User::class, 'favorite_tours', 'tour_id', 'user_id');
+    }
 
     public function decreaseVolume(int $seats): void
     {
@@ -53,6 +56,10 @@ class Tour extends Model
     {
         $this->volume += $seats;
         $this->save();
+    }
+
+    public function reviews(){
+        return $this->hasMany(Review::class);
     }
 
 }

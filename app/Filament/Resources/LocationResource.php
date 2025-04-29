@@ -17,7 +17,7 @@ class LocationResource extends Resource
 {
     protected static ?string $model = Location::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-camera'; // Камера вместо фотографии
+    protected static ?string $navigationIcon = 'heroicon-o-map-pin'; // Камера вместо фотографии
     protected static ?string $navigationGroup = 'Администрирование';
 
     public static function form(Form $form): Form
