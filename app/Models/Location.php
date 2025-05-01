@@ -21,4 +21,8 @@ class Location extends Model
     public function tours(){
         return $this->hasMany(Tour::class,'location_id');
     }
+
+    public function posts(){
+        return $this->hasMany(Post::class);
+    }
 }

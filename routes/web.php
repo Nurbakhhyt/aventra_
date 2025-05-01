@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CityController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TourController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 use Illuminate\Support\Facades\Auth;
@@ -21,11 +24,13 @@ use Illuminate\Support\Facades\Route;
 
 
 
-//// Маршруты подтверждения email
-//
 //Route::get('/', function () {
 //    return view('welcome');
 //});
+//
+//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+//
+//
 //
 //// Email Verification
 //Route::middleware(['auth'])->group(function () {
@@ -55,6 +60,11 @@ use Illuminate\Support\Facades\Route;
 //Route::middleware('auth')->group(function () {
 //    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
 //    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+//    Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
+//    Route::resource('posts', PostController::class);
+//    Route::post('/comments', [CommentController::class, 'store']);
+//    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+//
+//
+//
 //});
-//// Удалите, если не используете страницу home
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

@@ -1,6 +1,9 @@
 <?php
 
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteTourController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -13,30 +16,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TourController;
 
-// API маршруты для работы с городами
-Route::Resource('cities', CityController::class);
-
-// API маршруты для работы с локациями
-Route::Resource('locations', LocationController::class);
-
-// API маршруты для работы с турами
-Route::Resource('tours', TourController::class);
-
-Route::Resource('reviews', ReviewController::class);
-Route::Resource('favorites', FavoriteTourController::class);
-
-// Маршруты для бронирования (доступные только для авторизованных пользователей)
-Route::middleware('auth:sanctum')->group(function () {
-    // ... басқа авторизацияланған маршруттар ...
-    Route::get('/reviews/user', [ReviewController::class, 'userReviews'])->name('reviews.user');
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
-    Route::get('/bookings/user', [BookingController::class, 'userBookings'])->name('bookings.user');
-});
-
-// В случае необходимости добавьте другие API маршруты для дополнительных операций
-
-// Пример логина и получения токена
+//Login
 Route::post('/login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
 
@@ -49,6 +29,8 @@ Route::post('/login', function (Request $request) {
     return response()->json(['error' => 'Unauthorized'], 401);
 });
 
+
+//Register
 Route::get('/sanctum/csrf-cookie', [CsrfCookieController::class, 'show']);
 
 Route::post('/register', function (Request $request) {
@@ -62,6 +44,34 @@ Route::post('/register', function (Request $request) {
         'token' => $user->createToken('API Token')->plainTextToken
     ]);
 });
+
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+
+//Routes which don't use auth
+Route::apiResource('cities', CityController::class);
+Route::apiResource('locations', LocationController::class);
+Route::apiResource('tours', TourController::class);
+
+
+//Routes use auth
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+    Route::get('/bookings/user', [BookingController::class, 'userBookings'])->name('bookings.user');
+
+    Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
+
+    Route::apiResource('posts', PostController::class);
+
+    Route::apiResource('reviews', ReviewController::class);
+
+    Route::apiResource('favorites', FavoriteTourController::class);
+
+    Route::post('/comments', [CommentController::class, 'store']);
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+
 });
