@@ -10,14 +10,15 @@ use Illuminate\Support\Facades\Auth;
 
 class ReviewController extends Controller
 {
-    public function store(Request $request, $tourId)
+    public function store(Request $request)
     {
         $request->validate([
+            'tour_id' => 'required|exists:tours,id', // Турдың бар екенін тексеру
             'rating' => 'required|integer|min:1|max:5',
             'content' => 'required|string|max:1000',
         ]);
 
-        $tour = Tour::findOrFail($tourId);
+        $tour = Tour::findOrFail($request->tour_id);
 
         $review = new Review();
         $review->tour_id = $tour->id;
@@ -26,7 +27,10 @@ class ReviewController extends Controller
         $review->content = $request->content;
         $review->save();
 
-        return response()->json(['message' => 'Review added successfully'], 200);
+        // Жаңа пікірді оның авторымен бірге қайтару
+        $review = Review::with('user')->findOrFail($review->id);
+
+        return response()->json(['message' => 'Review added successfully', 'review' => $review], 200);
     }
 
     public function index($tourId)

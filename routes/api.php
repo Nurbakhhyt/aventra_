@@ -16,7 +16,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TourController;
 
-/*
+
 //Login
 Route::post('/login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
@@ -48,7 +48,7 @@ Route::post('/register', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+    return $request->user()->load('tours', 'bookings', 'favoriteTours'); // Қажетті қатынастарды жүктеңіз
 });
 
 
@@ -67,14 +67,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
     Route::apiResource('posts', PostController::class);
-
     Route::apiResource('reviews', ReviewController::class);
-
     Route::apiResource('favorites', FavoriteTourController::class);
 
     Route::post('/comments', [CommentController::class, 'store']);
     Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
 
 });
-
-*/

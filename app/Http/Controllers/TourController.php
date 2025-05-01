@@ -14,7 +14,6 @@ class TourController extends Controller
     // 1. Получение всех туров
     public function index(Request $request)
     {
-
         $query = Tour::query();
 
         $query->where('name', 'like', '%' . $request->name . '%');
@@ -39,22 +38,17 @@ class TourController extends Controller
             $query->where('location_id', $request->location_id);
         }
 
-        // ✅ Отфильтрованные туры
-        $tours = $query->with(['user', 'location'])->paginate(10);
+        // ✅ Отфильтрованные туры және пікірлер
+        $tours = $query->with(['user', 'location', 'reviews'])->paginate(10); // ✅ 'reviews' қатынасын қосу
 
         // ✅ Справочные данные для фильтрации
         $users = User::all();
         $locations = Location::all();
 
-//        return view('tours.index', compact('tours', 'users', 'locations'));
-
         return response()->json([
             'success' => true,
             'data' => $tours,
         ], 200);
-
-
-
     }
 
     public function create()
@@ -155,7 +149,7 @@ class TourController extends Controller
         if (request()->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'tour' => $tour,
+                'tour' => $tour->load(['user', 'location', 'reviews.user']), // ✅ Пікірлерді және олардың авторларын жүктеу
                 'users' => $users,
                 'locations' => $locations,
                 'booking' => $booking,
@@ -163,8 +157,6 @@ class TourController extends Controller
         }
 
         return view('tours.show', compact('tour', 'users', 'locations', 'booking'));
-
-
     }
 
 //    public function show(Tour $tour)
