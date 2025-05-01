@@ -24,47 +24,47 @@ use Illuminate\Support\Facades\Route;
 
 
 
-//Route::get('/', function () {
-//    return view('welcome');
-//});
-//
-//Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-//
-//
-//
-//// Email Verification
-//Route::middleware(['auth'])->group(function () {
-//    Route::get('/email/verify', function () {
-//        return view('auth.verify-email');
-//    })->name('verification.notice');
-//
-//    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
-//        $request->fulfill();
-//        return redirect('/admin');
-//    })->middleware(['auth', 'signed', 'throttle:6,1'])->name('verification.verify');
-//
-//    Route::post('/email/verification-notification', function () {
-//        request()->user()->sendEmailVerificationNotification();
-//        return back()->with('message', 'Verification link sent!');
-//    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
-//});
-//
-//// Аутентификация (если используете Laravel UI)
-//Auth::routes();
-//
-//
-//Route::resource('cities', CityController::class);
-//Route::resource('locations', LocationController::class);
-//Route::resource('tours', TourController::class);
-//
-//Route::middleware('auth')->group(function () {
-//    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-//    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
-//    Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
-//    Route::resource('posts', PostController::class);
-//    Route::post('/comments', [CommentController::class, 'store']);
-//    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
-//
-//
-//
-//});
+Route::get('/', function () {
+    return view('welcome');
+});
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+// Email Verification
+Route::middleware(['auth'])->group(function () {
+    Route::get('/email/verify', function () {
+        return view('auth.verify-email');
+    })->name('verification.notice');
+
+    Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+        $request->fulfill();
+        return redirect('/admin');
+    })->middleware(['auth', 'signed', 'throttle:6,1'])->name('verification.verify');
+
+    Route::post('/email/verification-notification', function () {
+        request()->user()->sendEmailVerificationNotification();
+        return back()->with('message', 'Verification link sent!');
+    })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+});
+
+// Аутентификация (если используете Laravel UI)
+Auth::routes();
+
+
+Route::resource('cities', CityController::class);
+Route::resource('locations', LocationController::class);
+Route::resource('tours', TourController::class);
+
+Route::middleware('auth')->group(function () {
+    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+    Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
+    Route::resource('posts', PostController::class);
+    Route::post('/comments', [CommentController::class, 'store']);
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+
+
+
+});
