@@ -52,4 +52,9 @@ class BookingController extends Controller
 
         return redirect()->route('tours.index')->with('success', 'Бронь успешно отменена.');
     }
+
+    public function userBookings(Request $request)
+    {
+        return Booking::where('user_id', auth()->id())->get();
+    }
 }

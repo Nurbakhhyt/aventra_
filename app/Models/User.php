@@ -19,7 +19,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'surname',
         'email',
         'password',
-        'city_id'
     ];
 
     public function canAccessFilament(): bool

@@ -36,5 +36,9 @@ class ReviewController extends Controller
 
         return response()->json($reviews);
     }
-}
 
+    public function userReviews(Request $request)
+    {
+        return Review::where('user_id', Auth::id())->with('tour')->get();
+    }
+}
