@@ -16,9 +16,10 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $fillable = [
         'name',
-        'surname',
         'email',
         'password',
+        'avatar',
+        'phone',
     ];
 
     public function canAccessFilament(): bool

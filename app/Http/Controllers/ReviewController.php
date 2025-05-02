@@ -45,4 +45,16 @@ class ReviewController extends Controller
     {
         return Review::where('user_id', Auth::id())->with('tour')->get();
     }
+
+    public function destroy(Review $review)
+    {
+        // Қолданушының бұл пікірді жоюға құқығы бар екенін тексеру (қажет болса)
+        if ($review->user_id !== Auth::id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $review->delete();
+
+        return response()->json(['message' => 'Review deleted successfully'], 200);
+    }
 }

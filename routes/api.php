@@ -50,7 +50,8 @@ Route::post('/register', function (Request $request) {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user()->load('tours', 'bookings', 'favoriteTours'); // Қажетті қатынастарды жүктеңіз
 });
-
+Route::middleware('auth:sanctum')->get('/user/reviews', [ReviewController::class, 'userReviews'])->name('user.reviews');
+Route::middleware('auth:sanctum')->post('/update-profile', [ProfileController::class, 'update'])->name('profile.update');
 
 //Routes which don't use auth
 Route::apiResource('cities', CityController::class);
