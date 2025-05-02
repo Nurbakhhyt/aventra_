@@ -52,7 +52,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 Route::middleware('auth:sanctum')->get('/user/reviews', [ReviewController::class, 'userReviews'])->name('user.reviews');
 Route::middleware('auth:sanctum')->post('/update-profile', [ProfileController::class, 'update'])->name('profile.update');
-
 //Routes which don't use auth
 Route::apiResource('cities', CityController::class);
 Route::apiResource('locations', LocationController::class);
@@ -67,7 +66,6 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
-    Route::apiResource('posts', PostController::class);
     Route::apiResource('reviews', ReviewController::class);
     Route::apiResource('favorites', FavoriteTourController::class);
 
@@ -75,3 +73,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
 
 });
+Route::apiResource('posts', PostController::class);
+
