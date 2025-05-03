@@ -49,8 +49,10 @@ class PostController extends Controller
     // 📌 Нақты постты көру + комментарийлер орны
     public function show($id)
     {
-        $post = Post::with(['user', 'location', 'images', 'comments.user'])->findOrFail($id);
-
+        $post = Post::with(['user', 'location', 'images', 'comments.user'])->find($id);
+        if (!$post) {
+            return response()->json(['message' => 'Post not found'], 404);
+        }
         return response()->json($post);
     }
 

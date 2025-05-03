@@ -8,16 +8,34 @@ use App\Models\TourImage;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Tour;
+
 class TourController extends Controller
 {
-
-    // 1. Получение всех туров
+    // 1. Получение всех туров с фильтрацией
     public function index(Request $request)
     {
         $query = Tour::query();
 
-        $query->where('name', 'like', '%' . $request->name . '%');
+        // Іздеу бойынша сүзгілеу
+        if ($request->filled('search')) {
+            $searchTerm = $request->input('search');
+            $query->where('name', 'like', "%{$searchTerm}%")
+                ->orWhere('description', 'like', "%{$searchTerm}%");
+        }
 
+        // Күні бойынша сүзгілеу
+        if ($request->filled('date')) {
+            $date = $request->input('date');
+            $query->whereDate('date', '<=', $date); // Турдың күні ізделген күннен ерте немесе тең болуы керек
+        }
+
+        // Адам саны бойынша сүзгілеу
+        if ($request->filled('people')) {
+            $peopleCount = $request->input('people');
+            $query->where('volume', '>=', $peopleCount); // Турдың орны ізделген адам санынан көп немесе тең болуы керек
+        }
+
+        // Қосымша сүзгілеулер (егер қажет болса)
         if ($request->filled('date_to')) {
             $query->whereDate('date', '<=', $request->date_to);
         }
@@ -149,7 +167,7 @@ class TourController extends Controller
         if (request()->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'tour' => $tour->load(['user', 'location', 'reviews.user']), // ✅ Пікірлерді және олардың авторларын жүктеу
+                'tour' => $tour->load(['user', 'location', 'reviews.user', 'images']), // ✅ Пікірлерді және олардың авторларын жүктеу, сонымен қатар суреттерді
                 'users' => $users,
                 'locations' => $locations,
                 'booking' => $booking,
