@@ -12,7 +12,13 @@ class Post extends Model
     protected $fillable = [
         'user_id',
         'location_id',
+        'title', // Жаңадан қосылған тақырып бағаны
         'content',
+        'saved', // Жаңадан қосылған сақтау бағаны
+    ];
+
+    protected $casts = [
+        'saved' => 'boolean', // 'saved' бағанын boolean типіне келтіру
     ];
 
     public function user()
@@ -34,4 +40,3 @@ class Post extends Model
         return $this->hasMany(PostImage::class);
     }
 }
-

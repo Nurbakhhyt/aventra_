@@ -19,16 +19,20 @@ class PostController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'title' => 'nullable|string|max:255', // Тақырыпты валидациялау
             'content' => 'nullable|string',
             'location_id' => 'required|exists:locations,id',
             'images.*' => 'image|max:2048',
             'images' => 'array|max:10',
+            'saved' => 'nullable|boolean', // Сақтауды валидациялау
         ]);
 
         $post = Post::create([
             'user_id' => auth()->id(),
             'location_id' => $request->location_id,
+            'title' => $request->title, // Тақырыпты қосу
             'content' => $request->content,
+            'saved' => $request->saved ?? false, // Сақтауды қосу, егер жоқ болса false
         ]);
 
         if ($request->hasFile('images')) {
@@ -38,11 +42,11 @@ class PostController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Пост успешно создан', 'post' => $post->load('images')], 201);
+        return response()->json(['message' => 'Пост сәтті құрылды', 'post' => $post->load('images')], 201);
     }
 
 
-    // 📌 Посмотреть конкретный пост + место для комментариев
+    // 📌 Нақты постты көру + комментарийлер орны
     public function show($id)
     {
         $post = Post::with(['user', 'location', 'images', 'comments.user'])->findOrFail($id);
@@ -50,30 +54,34 @@ class PostController extends Controller
         return response()->json($post);
     }
 
-    // 📌 Обновить пост
+    // 📌 Постты жаңарту
     public function update(Request $request, $id)
     {
         $post = Post::findOrFail($id);
 
-        // Проверка авторства (если нужно)
+        // Авторлықты тексеру (қажет болса)
         if ($post->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Недостаточно прав'], 403);
+            return response()->json(['message' => 'Құқығыңыз жеткіліксіз'], 403);
         }
 
         $request->validate([
+            'title' => 'nullable|string|max:255', // Тақырыпты валидациялау
             'content' => 'nullable|string',
             'location_id' => 'exists:locations,id',
             'images.*' => 'image|max:2048',
             'images' => 'array|max:10',
+            'saved' => 'nullable|boolean', // Сақтауды валидациялау
         ]);
 
         $post->update([
+            'title' => $request->title ?? $post->title, // Тақырыпты жаңарту
             'content' => $request->content,
             'location_id' => $request->location_id ?? $post->location_id,
+            'saved' => $request->saved ?? $post->saved, // Сақтауды жаңарту
         ]);
 
         if ($request->hasFile('images')) {
-            // Удалить старые изображения
+            // Ескі суреттерді жою
             foreach ($post->images as $image) {
                 Storage::disk('public')->delete($image->image_path);
                 $image->delete();
@@ -85,16 +93,16 @@ class PostController extends Controller
             }
         }
 
-        return response()->json(['message' => 'Пост обновлён', 'post' => $post->load('images')]);
+        return response()->json(['message' => 'Пост жаңартылды', 'post' => $post->load('images')]);
     }
 
-    // 📌 Удалить пост
+    // 📌 Постты жою
     public function destroy($id)
     {
         $post = Post::findOrFail($id);
 
         if ($post->user_id !== auth()->id()) {
-            return response()->json(['message' => 'Недостаточно прав'], 403);
+            return response()->json(['message' => 'Құқығыңыз жеткіліксіз'], 403);
         }
 
         foreach ($post->images as $image) {
@@ -104,7 +112,7 @@ class PostController extends Controller
 
         $post->delete();
 
-        return response()->json(['message' => 'Пост удалён']);
+        return response()->json(['message' => 'Пост жойылды']);
     }
 
 }
