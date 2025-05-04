@@ -39,4 +39,20 @@ class Post extends Model
     {
         return $this->hasMany(PostImage::class);
     }
+
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+    public function isLikedBy($user)
+    {
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
+    public function likesCount()
+    {
+        return $this->likes()->count();
+    }
+
 }

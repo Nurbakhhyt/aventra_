@@ -51,6 +51,12 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Tour::class, 'favorite_tours', 'user_id', 'tour_id');
     }
 
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
+
+
     protected $hidden = [
         'password',
         'remember_token',
