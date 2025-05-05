@@ -57,7 +57,8 @@ Route::middleware('auth:sanctum')->post('/update-profile', [ProfileController::c
 Route::apiResource('cities', CityController::class);
 Route::apiResource('locations', LocationController::class);
 Route::apiResource('tours', TourController::class);
-
+Route::get('/posts',[PostController::class,'index'])->name('posts.index');
+Route::get('/posts/{id}',[PostController::class,'show'])->name('posts.show');
 
 //Routes use auth
 Route::middleware('auth:sanctum')->group(function () {
@@ -75,7 +76,12 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/posts/{post}/like', [LikeController::class, 'store'])->name('posts.like');
     Route::delete('/posts/{post}/like', [LikeController::class, 'destroy'])->name('posts.unlike');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::delete('/post/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
+    Route::put('/post/{post}', [PostController::class, 'update'])->name('posts.update');
 
 });
-Route::apiResource('posts', PostController::class);
+
+
+//Route::apiResource('posts', PostController::class);
 
