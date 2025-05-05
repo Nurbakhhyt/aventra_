@@ -18,7 +18,8 @@ class ProfileController extends Controller
                 'reviews.tour',
                 'tours',
                 'bookings.tour',
-                'favoriteTours'
+                'favoriteTours',
+                'likes'
             ])->findOrFail($id);
 
             return response()->json($user);

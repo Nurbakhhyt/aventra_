@@ -45,7 +45,7 @@ class PostController extends Controller
     // 📌 Посмотреть конкретный пост + место для комментариев
     public function show($id)
     {
-        $post = Post::with(['user', 'location', 'images', 'comments.user', 'like'])->findOrFail($id);
+        $post = Post::with(['user', 'location', 'images', 'comments.user', 'likes'])->findOrFail($id);
 
         return response()->json([
             $post,
