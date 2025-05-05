@@ -15,9 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('location_id')->constrained()->onDelete('cascade');
-            $table->string('title')->nullable(); // Тақырып бағаны
             $table->text('content')->nullable();
-            $table->boolean('saved')->default(false); // Сақтау бағаны, әдепкі мәні 'false'
             $table->timestamps();
         });
     }

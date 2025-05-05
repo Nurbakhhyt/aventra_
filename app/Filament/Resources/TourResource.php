@@ -6,6 +6,7 @@ use App\Models\Tour;
 use App\Models\Location;
 use App\Models\User;
 use Filament\Forms;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Tables;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
@@ -62,7 +63,7 @@ class TourResource extends Resource
                     ->numeric()
                     ->required(),
 
-                TextInput::make('date')
+                DateTimePicker::make('date')
                     ->label('Дата проведения')
                     ->required(),
 

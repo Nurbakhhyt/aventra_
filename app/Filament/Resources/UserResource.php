@@ -3,16 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Models\User;
+use Faker\Provider\Text;
 use Filament\Forms;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
+use Nette\Utils\Image;
 
 class UserResource extends Resource
 {
@@ -51,6 +55,15 @@ class UserResource extends Resource
                         'admin' => 'Admin',
                     ]),
 
+                FileUpload::make('avatar')
+                    ->label('Қолданушы суреті')
+                    ->directory('users') // Папка хранения файлов
+                    ->image()
+                    ->nullable(),
+
+                TextInput::make('phone')
+                    ->numeric(),
+
                 DateTimePicker::make('email_verified_at')
                     ->label('Email подтвержден')
                     ->nullable(),
@@ -65,14 +78,16 @@ class UserResource extends Resource
                 TextColumn::make('name')->searchable(),
                 TextColumn::make('email')->searchable(),
                 TextColumn::make('role')->sortable()->badge(),
+                TextColumn::make('phone')->searchable(),
+                ImageColumn::make('avatar')->label('Сурет')->circular(),
                 TextColumn::make('created_at')->dateTime('d.m.Y H:i')->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(), // Кнопка редактирования
-                Tables\Actions\DeleteAction::make(), // Кнопка удаления
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

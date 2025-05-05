@@ -22,7 +22,7 @@ class PostController extends Controller
             'content' => 'nullable|string',
             'location_id' => 'required|exists:locations,id',
             'images.*' => 'image|max:2048',
-            'images' => 'array|max:10',
+            'images' => 'nullable|array|max:10',
         ]);
 
         $post = Post::create([
