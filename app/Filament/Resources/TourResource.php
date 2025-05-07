@@ -63,7 +63,7 @@ class TourResource extends Resource
                     ->numeric()
                     ->required(),
 
-                DateTimePicker::make('date')
+                TextInput::make('date')
                     ->label('Дата проведения')
                     ->required(),
 
