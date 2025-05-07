@@ -25,6 +25,7 @@ class TourResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-map'; // Иконка "чемодан"
     protected static ?string $navigationGroup = 'Администрирование';
 
+
     public static function form(Form $form): Form
     {
         return $form
@@ -63,7 +64,7 @@ class TourResource extends Resource
                     ->numeric()
                     ->required(),
 
-                TextInput::make('date')
+                DateTimePicker::make('date')
                     ->label('Дата проведения')
                     ->required(),
 
@@ -74,6 +75,12 @@ class TourResource extends Resource
                     ->nullable(),
             ]);
     }
+
+//    public static function mutateFormDataBeforeCreate(array $data): array
+//    {
+//        $data['user_id'] = Auth()->id();// текущий авторизованный пользователь
+//        return $data;
+//    }
 
     public static function table(Table $table): Table
     {
@@ -95,7 +102,6 @@ class TourResource extends Resource
                 TextColumn::make('price')
                     ->label('Цена')
                     ->money('kzt') // Или выберите свою валюту
-
                     ->sortable(),
 
                 TextColumn::make('volume')
