@@ -18,6 +18,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TourController;
 
 
+
 //Login
 Route::post('/login', function (Request $request) {
     $user = User::where('email', $request->email)->first();
@@ -84,4 +85,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
 
 //Route::apiResource('posts', PostController::class);
+
 

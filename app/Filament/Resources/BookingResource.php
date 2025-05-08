@@ -80,7 +80,7 @@ class BookingResource extends Resource
         $user = Auth::user();
 
         // Если пользователь — гид (например, роль user), фильтруем
-        if ($user && $user->hasRole('guide')) {
+        if ($user && $user->hasRole(['guide','admin'])) {
             return parent::getEloquentQuery()
                 ->whereHas('tour', fn ($query) => $query->where('user_id', $user->id));
         }

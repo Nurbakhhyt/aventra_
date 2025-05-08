@@ -49,13 +49,15 @@ Route::middleware(['auth'])->group(function () {
     })->middleware(['auth', 'throttle:6,1'])->name('verification.send');
 });
 
+
+
 // Аутентификация (если используете Laravel UI)
 Auth::routes();
 
 
-//Route::resource('cities', CityController::class);
-//Route::resource('locations', LocationController::class);
-//Route::resource('tours', TourController::class);
+Route::resource('cities', CityController::class);
+Route::resource('locations', LocationController::class);
+Route::resource('tours', TourController::class);
 
 Route::middleware('auth')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -68,4 +70,5 @@ Route::middleware('auth')->group(function () {
 
 
 });
+
 */
