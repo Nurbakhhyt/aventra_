@@ -13,12 +13,12 @@ class Booking extends Model
         'expires_at' => 'datetime',
     ];
 
-    public function tour(): BelongsTo
+    public function tour()
     {
         return $this->belongsTo(Tour::class);
     }
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
