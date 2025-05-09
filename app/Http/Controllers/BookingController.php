@@ -64,6 +64,8 @@ class BookingController extends Controller
 
     public function userBookings(Request $request)
     {
-        return Booking::where('user_id', auth()->id())->get();
+        return Booking::with('user_id',
+            auth()->id())
+            ->get();
     }
 }
