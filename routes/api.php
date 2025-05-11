@@ -61,6 +61,9 @@ Route::apiResource('tours', TourController::class);
 Route::get('/posts',[PostController::class,'index'])->name('posts.index');
 Route::get('/posts/{id}',[PostController::class,'show'])->name('posts.show');
 
+
+Route::resource('hotels', HotelController::class);
+
 //Routes use auth
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
@@ -80,6 +83,27 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
     Route::delete('/post/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
     Route::put('/post/{post}', [PostController::class, 'update'])->name('posts.update');
+
+
+    Route::get('/bookings', [BookingHotelController::class, 'index'])->name('bookings.index');//json
+    Route::get('/bookings/{booking}', [BookingHotelController::class, 'show'])->name('bookings.show');//json
+    Route::get('/bookings/user/{userId}', [BookingHotelController::class, 'userBookings'])->name('bookings.user');
+    Route::get('/bookings/hotel/{hotelId}', [BookingHotelController::class, 'hotelBookings'])->name('bookings.hotel');
+    Route::post('/bookings/{booking}/confirm', [BookingHotelController::class, 'confirm'])->name('bookings.confirm');
+    Route::post('/bookings/{booking}/cancel', [BookingHotelController::class, 'cancel'])->name('bookings.cancel');
+    Route::get('/bookings/step1', [BookingHotelController::class, 'step1'])->name('bookings.step1');
+    Route::get('/bookings/step2/{hotel}', [BookingHotelController::class, 'step2'])->name('bookings.step2');
+    Route::get('/hotels/{hotel}/book/{roomType}', [BookingHotelController::class, 'create'])->name('bookings.create');//json
+    Route::post('/bookings', [BookingHotelController::class, 'store'])->name('bookings.store');
+    Route::post('/bookings/check-availability', [BookingHotelController::class, 'checkAvailability'])->name('bookings.check-availability');
+    Route::post('/bookings/{booking}/pay', [BookingHotelController::class, 'pay'])->name('bookings.pay');
+
+    // Маршруты для оплаты
+    Route::get('/bookings/{booking}/pay', [PaymentHotelController::class, 'create'])->name('payments.create');
+    Route::get('/bookings/{booking}/pay/success', [PaymentHotelController::class, 'success'])->name('payments.success');
+    Route::get('/bookings/{booking}/pay/cancel', [PaymentHotelController::class, 'cancel'])->name('payments.cancel');
+
+
 
 });
 

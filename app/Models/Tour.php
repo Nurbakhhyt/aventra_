@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use Filament\Tables\Columns\Summarizers\Concerns\BelongsToColumn;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Tour extends Model
 {
