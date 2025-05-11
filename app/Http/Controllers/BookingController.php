@@ -17,9 +17,14 @@ class BookingController extends Controller
         ]);
 
         $user = Auth::user();
+
+        if (!$user) {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
+
         $tour = Tour::findOrFail($data['tour_id']);
 
-        // Проверка количества мест (учитывая уже занятые активными бронированиями)
+        // Қолжетімді орындарды тексеру
         $activeBookings = Booking::where('tour_id', $tour->id)
             ->where('expires_at', '>', now())
             ->sum('seats');
@@ -27,11 +32,11 @@ class BookingController extends Controller
         $availableSeats = $tour->volume - $activeBookings;
 
         if ($availableSeats < $data['seats']) {
-            return redirect()->back()->with('error', 'Недостаточно свободных мест для бронирования.');
+            return response()->json(['message' => 'Недостаточно свободных мест для бронирования.'], 400);
         }
 
-        // Создание брони с истечением через 15 минут
-        Booking::create([
+        // Бронь жасау
+        $booking = Booking::create([
             'user_id' => $user->id,
             'tour_id' => $tour->id,
             'seats' => $data['seats'],
@@ -39,8 +44,12 @@ class BookingController extends Controller
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        return redirect()->route('tours.index')->with('success', 'Тур успешно забронирован! У вас есть 15 минут, чтобы завершить оплату.');
+        return response()->json([
+            'message' => 'Тур успешно забронирован!',
+            'booking' => $booking
+        ], 201);
     }
+
 
     public function destroy(Booking $booking)
     {
@@ -55,6 +64,8 @@ class BookingController extends Controller
 
     public function userBookings(Request $request)
     {
-        return Booking::where('user_id', auth()->id())->get();
+        return Booking::with('user_id',
+            auth()->id())
+            ->get();
     }
 }

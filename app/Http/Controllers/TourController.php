@@ -158,23 +158,25 @@ class TourController extends Controller
         $users = User::all();
         $locations = Location::all();
 
-        $booking = null;
-        if (auth()->check()) {
-            $booking = \App\Models\Booking::where('tour_id', $tour->id)
-                ->where('user_id', auth()->id())
-                ->first();
-        }
+        $bookings = Booking::where('tour_id', $tour->id)
+            ->where('user_id', auth()->id())
+            ->get();
+//        if (auth()->check()) {
+//            $bookings = \App\Models\Booking::where('tour_id', $tour->id)
+//                ->where('user_id', auth()->id())
+//                ->get();
+//        }
         if (request()->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'tour' => $tour->load(['user', 'location', 'reviews.user', 'images']), // ✅ Пікірлерді және олардың авторларын жүктеу, сонымен қатар суреттерді
+                'tour' => $tour->load(['user', 'location', 'reviews.user', 'images','bookings']), // ✅ Пікірлерді және олардың авторларын жүктеу, сонымен қатар суреттерді
                 'users' => $users,
                 'locations' => $locations,
-                'booking' => $booking,
+                'bookings' => $bookings,
             ]);
         }
 
-        return view('tours.show', compact('tour', 'users', 'locations', 'booking'));
+        return view('tours.show', compact('tour', 'users', 'locations','bookings'));
     }
 
 //    public function show(Tour $tour)
