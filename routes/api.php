@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\BookingHotelController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteTourController;
+use App\Http\Controllers\HotelController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\PaymentHotelController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -50,7 +53,7 @@ Route::post('/register', function (Request $request) {
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user()->load('tours', 'bookings', 'favoriteTours'); // Қажетті қатынастарды жүктеңіз
+    return $request->user()->load('tours', 'bookings', 'favoriteTours', 'posts'); // 'posts' қосылды
 });
 Route::middleware('auth:sanctum')->get('/user/reviews', [ReviewController::class, 'userReviews'])->name('user.reviews');
 Route::middleware('auth:sanctum')->post('/update-profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -68,7 +71,7 @@ Route::resource('hotels', HotelController::class);
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
-    Route::get('/bookings/user', [BookingController::class, 'userBookings'])->name('bookings.user');
+//    Route::get('/bookings/user', [BookingController::class, 'userBookings'])->name('bookings.user');
 
     Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
@@ -87,7 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/bookings', [BookingHotelController::class, 'index'])->name('bookings.index');//json
     Route::get('/bookings/{booking}', [BookingHotelController::class, 'show'])->name('bookings.show');//json
-    Route::get('/bookings/user/{userId}', [BookingHotelController::class, 'userBookings'])->name('bookings.user');
+    Route::get('/bookings/user/{userId}', [BookingHotelController::class, 'userBookings'])->name('bookingsHotel.user');
     Route::get('/bookings/hotel/{hotelId}', [BookingHotelController::class, 'hotelBookings'])->name('bookings.hotel');
     Route::post('/bookings/{booking}/confirm', [BookingHotelController::class, 'confirm'])->name('bookings.confirm');
     Route::post('/bookings/{booking}/cancel', [BookingHotelController::class, 'cancel'])->name('bookings.cancel');

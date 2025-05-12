@@ -24,7 +24,6 @@ class BookingHotelController extends Controller
             ->with(['hotel', 'roomType'])
             ->latest()
             ->paginate(10);
-        return response()->json(['bookings' => $bookings]);
 
 //        return view('bookings.index', compact('bookings'));
     }
@@ -225,7 +224,9 @@ class BookingHotelController extends Controller
         $bookings = BookingHotel::where('user_id', $userId)
             ->with(['hotel', 'room'])
             ->paginate(10);
-        return view('bookings.user', compact('bookings'));
+        return response()->json(['bookings' => $bookings]);
+
+//        return view('bookings.user', compact('bookings'));
     }
 
     /**
