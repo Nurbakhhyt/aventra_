@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('address')->nullable();
-            $table->string('city');
+            $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('cascade');
             $table->string('country')->default('Qazaqstan');
             $table->text('description')->nullable();
             $table->integer('stars')->default(3);

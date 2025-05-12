@@ -14,7 +14,7 @@ class Hotel extends Model
         'name',
         'category',
         'address',
-        'city',
+        'city_id',
         'country',
         'description',
         'stars',
@@ -52,6 +52,10 @@ class Hotel extends Model
     public function bookingsHotel()
     {
         return $this->hasMany(BookingHotel::class);
+    }
+
+    public function city(){
+        return $this->belongsTo(City::class);
     }
 
     public function getImageUrlAttribute()
