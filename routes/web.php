@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "web" middleware group. Make something great!
 |
 */
-/*
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/email/verify', function () {
         return view('auth.verify-email');
@@ -69,6 +69,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/{booking}/pay/success', [PaymentHotelController::class, 'success'])->name('payments.success');
     Route::get('/bookings/{booking}/pay/cancel', [PaymentHotelController::class, 'cancel'])->name('payments.cancel');
 });
+
+
 /*
 
 Route::get('/', function () {

@@ -1,8 +1,11 @@
 <?php
 
+use App\Http\Controllers\BookingHotelController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteTourController;
+use App\Http\Controllers\HotelController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\PaymentHotelController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -17,7 +20,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TourController;
 
-
+/*
 
 //Login
 Route::post('/login', function (Request $request) {
@@ -111,3 +114,4 @@ Route::middleware('auth:sanctum')->group(function () {
 //Route::apiResource('posts', PostController::class);
 
 
+*/
