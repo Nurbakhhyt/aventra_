@@ -12,7 +12,7 @@
                         <p class="text-muted">{{ $hotel->stars }} звезд</p>
                         <p>{{ $hotel->description }}</p>
                         <p><strong>Адрес:</strong> {{ $hotel->address }}</p>
-                        <p><strong>Город:</strong> {{ $hotel->city }}</p>
+                        <p><strong>Город:</strong> {{ $hotel->city->name }}</p>
                         <p><strong>Страна:</strong> {{ $hotel->country }}</p>
                     </div>
                 </div>

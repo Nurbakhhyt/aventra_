@@ -73,7 +73,10 @@ class HotelResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('city'),
+                Tables\Columns\TextColumn::make('city.name')
+                    ->label('Cities')
+                    ->searchable()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('country'),
                 Tables\Columns\TextColumn::make('stars'),
                 Tables\Columns\TextColumn::make('price_per_night')->money('KZT'),

@@ -20,7 +20,7 @@ use App\Http\Controllers\CityController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TourController;
 
-/*
+
 
 //Login
 Route::post('/login', function (Request $request) {
@@ -114,4 +114,4 @@ Route::middleware('auth:sanctum')->group(function () {
 //Route::apiResource('posts', PostController::class);
 
 
-*/
+

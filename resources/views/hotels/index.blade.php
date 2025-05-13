@@ -35,7 +35,7 @@
                         <div class="card-body">
                             <h5 class="card-title">{{ $hotel->name }}</h5>
                             <p class="card-text">
-                                <i class="fas fa-map-marker-alt"></i> {{ $hotel->city }}, {{ $hotel->country }}<br>
+                                <i class="fas fa-map-marker-alt"></i> {{ $hotel->city->name }}, {{ $hotel->country }}<br>
                                 <i class="fas fa-star text-warning"></i> {{ $hotel->stars }} звезд<br>
                                 <i class="fas fa-thumbs-up"></i> Рейтинг: {{ $hotel->rating }}/5
                             </p>

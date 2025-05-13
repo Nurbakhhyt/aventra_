@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+/*
 Route::middleware(['auth'])->group(function () {
     Route::get('/email/verify', function () {
         return view('auth.verify-email');
@@ -69,7 +70,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/{booking}/pay/success', [PaymentHotelController::class, 'success'])->name('payments.success');
     Route::get('/bookings/{booking}/pay/cancel', [PaymentHotelController::class, 'cancel'])->name('payments.cancel');
 });
-
+*/
 
 /*
 
