@@ -19,29 +19,29 @@ class CityResource extends Resource
     protected static ?string $model = City::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-office'; // Иконка города
-    protected static ?string $navigationGroup = 'Администрирование';
+    protected static ?string $navigationGroup = 'Әкімшілік';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Название города')
+                    ->label('Қала атауы')
                     ->required()
                     ->maxLength(255),
 
                 FileUpload::make('image')
-                    ->label('Изображение города')
+                    ->label('Қала суреті')
                     ->directory('cities') // Папка хранения файлов
                     ->image()
                     ->nullable(),
 
                 Textarea::make('description')
-                    ->label('Описание города')
+                    ->label('Қала анықтамасы')
                     ->nullable(),
 
                 TextInput::make('city_code')
-                    ->label('Код города')
+                    ->label('Қала коды')
                     ->required()
                     ->maxLength(3)
                     ->unique(ignoreRecord: true),
@@ -53,11 +53,11 @@ class CityResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('image')
-                    ->label('Изображение')
+                    ->label('Суреті')
                     ->circular(),
 
                 TextColumn::make('name')
-                    ->label('Название')
+                    ->label('Аты')
                     ->searchable()
                     ->sortable(),
 
@@ -66,7 +66,7 @@ class CityResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label('Дата создания')
+                    ->label('Құрылған уақыты')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])

@@ -17,7 +17,7 @@ class BookingResource extends Resource
     protected static ?string $model = Booking::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-check';
-    protected static ?string $navigationGroup = 'Туры';
+    protected static ?string $navigationGroup = 'Турлар';
 
     public static function form(Form $form): Form
     {
@@ -47,10 +47,10 @@ class BookingResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('tour.name')->label('Тур'),
-                Tables\Columns\TextColumn::make('user.name')->label('Пользователь'),
-                Tables\Columns\TextColumn::make('seats')->label('Места'),
-                Tables\Columns\BooleanColumn::make('is_paid')->label('Оплачено'),
-                Tables\Columns\TextColumn::make('expires_at')->label('Истекает')->dateTime(),
+                Tables\Columns\TextColumn::make('user.name')->label('Қолданушы'),
+                Tables\Columns\TextColumn::make('seats')->label('Орын саны'),
+                Tables\Columns\BooleanColumn::make('is_paid')->label('Тқлем статусы'),
+                Tables\Columns\TextColumn::make('expires_at')->label('Мерзімі бітеді')->dateTime(),
             ])
             ->filters([
                 //

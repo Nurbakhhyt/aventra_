@@ -18,19 +18,19 @@ class LocationResource extends Resource
     protected static ?string $model = Location::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map-pin'; // Камера вместо фотографии
-    protected static ?string $navigationGroup = 'Администрирование';
+    protected static ?string $navigationGroup = 'Әкімшілік';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Название локации')
+                    ->label('Локация аты')
                     ->required()
                     ->maxLength(255),
 
                 Select::make('city_id')
-                    ->label('Город')
+                    ->label('Қала')
                     ->relationship('city', 'name')
                     ->searchable()
                     ->nullable()
@@ -48,12 +48,12 @@ class LocationResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('city.name')
-                    ->label('Город')
+                    ->label('Қала')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label('Дата создания')
+                    ->label('Құрылған күні')
                     ->dateTime('d.m.Y H:i')
                     ->sortable(),
             ])

@@ -19,7 +19,7 @@ class PostImageResource extends Resource
     protected static ?string $model = PostImage::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-photo';
-    protected static ?string $navigationGroup = 'Post';
+    protected static ?string $navigationGroup = 'Посттар';
 
     public static function form(Form $form): Form
     {
@@ -34,7 +34,7 @@ class PostImageResource extends Resource
                     ->directory('post-images')
                     ->image()
                     ->required()
-                    ->label('Изображение'),
+                    ->label('Суреті'),
             ]);
     }
 
@@ -43,7 +43,7 @@ class PostImageResource extends Resource
         return $table
             ->columns([
                 ImageColumn::make('image_path')
-                    ->label('Изображение')
+                    ->label('Суреті')
                     ->square()
                     ->height(60),
 
@@ -52,7 +52,7 @@ class PostImageResource extends Resource
                     ->searchable(),
 
                 TextColumn::make('created_at')
-                    ->label('Добавлено')
+                    ->label('Қосылды')
                     ->dateTime('d.m.Y H:i'),
             ])
             ->actions([

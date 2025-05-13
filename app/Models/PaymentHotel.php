@@ -9,7 +9,6 @@ class PaymentHotel extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         'booking_id',
         'paypal_payment_id',
@@ -26,6 +25,6 @@ class PaymentHotel extends Model
 
     public function booking()
     {
-        return $this->belongsTo(BookingHotel::class);
+        return $this->belongsTo(BookingHotel::class, 'booking_id');
     }
 }

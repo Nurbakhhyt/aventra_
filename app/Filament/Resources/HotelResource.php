@@ -23,17 +23,17 @@ class HotelResource extends Resource
 {
     protected static ?string $model = Hotel::class;
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
-    protected static ?string $navigationGroup = 'Отели и номера';
+    protected static ?string $navigationGroup = 'Қонақ үй және бөлмелер';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Информация об отеле')
+                Section::make('Қонақ үй бойынша ақпарат')
                     ->schema([
                         TextInput::make('name')->required()->maxLength(255),
                         TextInput::make('address')->required()->maxLength(255),
-                        Select::make('city_id')->label('City')->relationship('city','name')
+                        Select::make('city_id')->label('Қала')->relationship('city','name')
                         ->searchable()
                         ->preload()
                         ->required(),
@@ -44,7 +44,7 @@ class HotelResource extends Resource
                         FileUpload::make('image')->image()->directory('hotels')->maxSize(2048),
                     ]),
 
-                Section::make('Типы комнат')
+                Section::make('Бөлме түрлері')
                     ->schema([
                         Repeater::make('roomTypes')
                             ->relationship()
@@ -54,15 +54,15 @@ class HotelResource extends Resource
                                 TextInput::make('price_per_night')->required()->numeric()->minValue(0),
                                 TextInput::make('max_guests')->required()->numeric()->minValue(1),
                                 TextInput::make('available_rooms')->required()->numeric()->minValue(0),
-                                Textarea::make('description')->label('Описание')->nullable(),
-                                FileUpload::make('image')->label('Изображение')->image()->directory('room-types')->maxSize(2048),
-                                Toggle::make('has_breakfast')->label('Завтрак'),
+                                Textarea::make('description')->label('Сипаттамасы')->nullable(),
+                                FileUpload::make('image')->label('Суреті')->image()->directory('room-types')->maxSize(2048),
+                                Toggle::make('has_breakfast')->label('Таңғы ас'),
                                 Toggle::make('has_wifi')->label('Wi-Fi'),
-                                Toggle::make('has_tv')->label('Телевизор'),
+                                Toggle::make('has_tv')->label('Теледидар'),
                                 Toggle::make('has_air_conditioning')->label('Кондиционер'),
                             ])
                             ->columns(2)
-                            ->createItemButtonLabel('Добавить тип комнаты'),
+                            ->createItemButtonLabel('Бөлме түрін қосу'),
                     ])
                     ->collapsible(),
             ]);
@@ -74,7 +74,7 @@ class HotelResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
                 Tables\Columns\TextColumn::make('city.name')
-                    ->label('Cities')
+                    ->label('Қалалар')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('country'),

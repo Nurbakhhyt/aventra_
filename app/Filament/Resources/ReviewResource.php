@@ -23,7 +23,7 @@ class ReviewResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
 
-    protected static ?string $navigationGroup = 'Туры';
+    protected static ?string $navigationGroup = 'Турлар';
 
     public static function form(Form $form): Form
     {
@@ -39,10 +39,10 @@ class ReviewResource extends Resource
                     ->relationship('user', 'name')
                     ->searchable()
                     ->required()
-                    ->label('Пользователь'),
+                    ->label('Қолданушы'),
 
                 Textarea::make('content')
-                    ->label('Отзыв')
+                    ->label('Пікір')
                     ->nullable(),
 
                 TextInput::make('rating')
@@ -59,7 +59,7 @@ class ReviewResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('user.name')->label('Пользователь')->searchable(),
+                TextColumn::make('user.name')->label('Қолданушы')->searchable(),
                 TextColumn::make('tour.name')->label('Тур')->searchable(),
                 TextColumn::make('rating')->sortable(),
                 TextColumn::make('content')->limit(30),

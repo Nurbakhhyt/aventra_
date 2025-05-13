@@ -23,7 +23,7 @@ class TourResource extends Resource
     protected static ?string $model = Tour::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-map'; // Иконка "чемодан"
-    protected static ?string $navigationGroup = 'Администрирование';
+    protected static ?string $navigationGroup = 'Әкімшілік';
 
 
     public static function form(Form $form): Form
@@ -31,17 +31,17 @@ class TourResource extends Resource
         return $form
             ->schema([
                 TextInput::make('name')
-                    ->label('Название тура')
+                    ->label('Тур аты')
                     ->required()
                     ->maxLength(255),
 
                 Textarea::make('description')
-                    ->label('Описание тура')
+                    ->label('Тур сипаттамасы')
                     ->required()
                     ->maxLength(65535),
 
                 Select::make('user_id')
-                    ->label('Организатор')
+                    ->label('Тур жетекшісі')
                     ->relationship('user', 'name')
                     ->searchable()
                     ->nullable()
@@ -55,21 +55,21 @@ class TourResource extends Resource
                     ->preload(),
 
                 TextInput::make('price')
-                    ->label('Цена')
+                    ->label('Бағасы')
                     ->numeric()
                     ->required(),
 
                 TextInput::make('volume')
-                    ->label('Количество мест')
+                    ->label('Орын саны')
                     ->numeric()
                     ->required(),
 
                 DateTimePicker::make('date')
-                    ->label('Дата проведения')
+                    ->label('Күні')
                     ->required(),
 
                 FileUpload::make('image')
-                    ->label('Изображение тура')
+                    ->label('Тур суреті')
                     ->image()
                     ->directory('tours') // Куда будут загружаться файлы
                     ->nullable(),
@@ -87,12 +87,12 @@ class TourResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('Название')
+                    ->label('Тур аты')
                     ->searchable()
                     ->sortable(),
 
                 TextColumn::make('user.name')
-                    ->label('Организатор')
+                    ->label('Тур жетекшісі')
                     ->sortable(),
 
                 TextColumn::make('location.name')
@@ -100,19 +100,19 @@ class TourResource extends Resource
                     ->sortable(),
 
                 TextColumn::make('price')
-                    ->label('Цена')
+                    ->label('Бағасы')
                     ->money('kzt') // Или выберите свою валюту
                     ->sortable(),
 
                 TextColumn::make('volume')
-                    ->label('Мест'),
+                    ->label('Орын саны'),
 
                 TextColumn::make('date')
-                    ->label('Дата тура')
+                    ->label('Күні')
                     ->sortable(),
 
                 ImageColumn::make('image')
-                    ->label('Фото')
+                    ->label('Суреті')
                     ->circular(), // Красивая круглая форма картинки
             ])
             ->filters([

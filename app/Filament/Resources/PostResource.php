@@ -21,7 +21,7 @@ class PostResource extends Resource
     protected static ?string $model = Post::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';
-    protected static ?string $navigationGroup = 'Post';
+    protected static ?string $navigationGroup = 'Посттар';
 
     public static function form(Form $form): Form
     {
@@ -40,14 +40,14 @@ class PostResource extends Resource
                 TextInput::make('title')
                     ->required()
                     ->maxLength(255)
-                    ->label('Заголовок'),
+                    ->label('Айдар'),
 
                 Textarea::make('content')
                     ->required()
                     ->label('Контент'),
 
                 Toggle::make('saved')
-                    ->label('Сохранено пользователем'),
+                    ->label('Сақталды'),
             ]);
     }
 
@@ -56,11 +56,11 @@ class PostResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('id')->sortable(),
-                TextColumn::make('title')->searchable()->limit(30)->label('Заголовок'),
+                TextColumn::make('title')->searchable()->limit(30)->label('Айдар'),
                 TextColumn::make('user.name')->label('Автор')->searchable(),
                 TextColumn::make('location.name')->label('Локация')->searchable(),
                 IconColumn::make('saved')
-                    ->label('Сохранено')
+                    ->label('Сақталды')
                     ->boolean(),
                 TextColumn::make('created_at')->dateTime('d.m.Y H:i')->sortable(),
             ])

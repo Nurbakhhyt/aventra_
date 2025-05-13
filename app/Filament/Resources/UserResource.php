@@ -24,7 +24,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users'; // Иконка в меню
 
-    protected static ?string $navigationGroup = 'Администрирование'; // Группа в панели
+    protected static ?string $navigationGroup = 'Әкімшілік'; // Группа в панели
 
     public static function form(Form $form): Form
     {
@@ -65,7 +65,7 @@ class UserResource extends Resource
                     ->numeric(),
 
                 DateTimePicker::make('email_verified_at')
-                    ->label('Email подтвержден')
+                    ->label('Email рәсімделді')
                     ->nullable(),
             ]);
     }

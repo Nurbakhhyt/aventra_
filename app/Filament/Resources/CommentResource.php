@@ -18,7 +18,7 @@ class CommentResource extends Resource
     protected static ?string $model = Comment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-chat-bubble-left-right';
-    protected static ?string $navigationGroup = 'Post';
+    protected static ?string $navigationGroup = 'Посттар';
 
     public static function form(Form $form): Form
     {
@@ -27,7 +27,7 @@ class CommentResource extends Resource
                 Select::make('user_id')
                     ->relationship('user', 'name')
                     ->required()
-                    ->label('Пользователь'),
+                    ->label('Қолданушы'),
 
                 Select::make('post_id')
                     ->relationship('post', 'title')
@@ -36,7 +36,7 @@ class CommentResource extends Resource
 
                 Textarea::make('content')
                     ->required()
-                    ->label('Комментарий'),
+                    ->label('Пікір'),
             ]);
     }
 
@@ -47,8 +47,8 @@ class CommentResource extends Resource
                 TextColumn::make('id')->sortable(),
                 TextColumn::make('user.name')->label('Автор')->searchable(),
                 TextColumn::make('post.title')->label('Пост')->limit(20)->searchable(),
-                TextColumn::make('content')->limit(40)->label('Содержимое'),
-                TextColumn::make('created_at')->dateTime('d.m.Y H:i')->label('Дата'),
+                TextColumn::make('content')->limit(40)->label('Мазмұны'),
+                TextColumn::make('created_at')->dateTime('d.m.Y H:i')->label('Уақыты'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

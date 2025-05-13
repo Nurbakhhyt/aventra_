@@ -19,7 +19,7 @@ class BookingHotel extends Model
         'total_price',
         'status',
         'payment_id',
-        'payment_status'
+        'payment_status',
     ];
 
     protected $casts = [
@@ -38,13 +38,14 @@ class BookingHotel extends Model
         return $this->belongsTo(Hotel::class);
     }
 
-    public function payments(){
-
-    }
-
     public function roomType()
     {
         return $this->belongsTo(RoomType::class);
+    }
+
+    public function payments()
+    {
+//        return $this->hasMany(PaymentHotel::class, 'booking_id');
     }
 
     public function calculateTotalPrice()

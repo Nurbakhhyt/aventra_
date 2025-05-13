@@ -19,7 +19,7 @@ class TourImageResource extends Resource
     protected static ?string $model = TourImage::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-photo'; // Иконка "фото"
-    protected static ?string $navigationGroup = 'Туры';
+    protected static ?string $navigationGroup = 'Турлар';
 
     public static function form(Form $form): Form
     {
@@ -33,7 +33,7 @@ class TourImageResource extends Resource
                     ->preload(),
 
                 FileUpload::make('image_path')
-                    ->label('Изображение')
+                    ->label('Сурет')
                     ->image()
                     ->directory('tour-images') // Куда сохраняем фото
                     ->required(),
@@ -50,7 +50,7 @@ class TourImageResource extends Resource
                     ->searchable(),
 
                 ImageColumn::make('image_path')
-                    ->label('Изображение')
+                    ->label('Сурет')
                     ->circular(),
             ])
             ->filters([
