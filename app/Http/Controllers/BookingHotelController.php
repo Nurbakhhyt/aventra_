@@ -133,9 +133,9 @@ class BookingHotelController extends Controller
      */
     public function edit(BookingHotel $booking)
     {
-        if ($booking->status !== 'pending') {
+        if (!in_array($booking->status, ['pending'])) {
             return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Можно редактировать только бронирования со статусом "Ожидает подтверждения"');
+                ->with('error', 'Можно редактировать только бронирования со статусом "Ожидает оплаты"');
         }
 
         $booking->load(['hotel', 'roomType']);
@@ -150,9 +150,9 @@ class BookingHotelController extends Controller
      */
     public function update(Request $request, BookingHotel $booking)
     {
-        if ($booking->status !== 'pending') {
+        if (!in_array($booking->status, ['pending'])) {
             return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Можно редактировать только бронирования со статусом "Ожидает подтверждения"');
+                ->with('error', 'Можно редактировать только бронирования со статусом "Ожидает оплаты"');
         }
 
         $validator = Validator::make($request->all(), [
@@ -248,7 +248,7 @@ class BookingHotelController extends Controller
             return back()->with('error', 'У вас нет прав для подтверждения этого бронирования');
         }
 
-        if ($booking->status !== 'pending') {
+        if (!in_array($booking->status, ['pending']))  {
             return back()->with('error', 'Это бронирование уже не может быть подтверждено');
         }
 
@@ -283,6 +283,11 @@ class BookingHotelController extends Controller
         // Проверяем, можно ли отменить бронирование
         if ($booking->status === 'cancelled') {
             return back()->with('error', 'Это бронирование уже отменено');
+        }
+
+        // Проверяем, что бронирование находится в статусе, который можно отменить
+        if (!in_array($booking->status, ['pending', 'pending_payment'])) {
+            return back()->with('error', 'Можно отменить только бронирования со статусом "Ожидает оплаты"');
         }
 
         try {
@@ -343,6 +348,11 @@ class BookingHotelController extends Controller
         if ($booking->status !== 'pending') {
             return back()->with('error', 'Это бронирование уже не может быть оплачено');
         }
+
+        // Обновляем статус бронирования на 'pending_payment'
+        $booking->update([
+            'status' => 'pending_payment'
+        ]);
 
         // Перенаправляем на PayPal
         return redirect()->route('payments.create', $booking);

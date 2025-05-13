@@ -109,8 +109,41 @@ class PaymentHotelController extends Controller
             Log::info('Processing payment success', [
                 'booking_id' => $booking->id,
                 'token' => $request->token,
-                'booking_status' => $booking->status
+                'booking_status' => $booking->status,
+                'payment_status' => $booking->payment_status
             ]);
+
+            // Check if the booking is already paid
+            if ($booking->payment_status === 'paid') {
+                Log::warning('Attempt to pay an already paid booking', [
+                    'booking_id' => $booking->id
+                ]);
+
+                return redirect()->route('bookings.show', $booking)
+                    ->with('error', 'Оплата уже была произведена. Повторная оплата невозможна.');
+            }
+
+            // Validate the token parameter
+            if (empty($request->token) || !preg_match('/^[A-Z0-9]+$/', $request->token)) {
+                Log::error('Invalid or missing token', [
+                    'booking_id' => $booking->id,
+                    'token' => $request->token
+                ]);
+
+                return redirect()->route('bookings.show', $booking)
+                    ->with('error', 'Неверный токен. Пожалуйста, попробуйте снова.');
+            }
+
+            // Проверяем, что бронирование находится в статусе, который можно оплатить
+            if (!in_array($booking->status, ['pending', 'pending_payment'])) {
+                Log::warning('Attempt to pay booking with invalid status', [
+                    'booking_id' => $booking->id,
+                    'status' => $booking->status
+                ]);
+
+                return redirect()->route('bookings.show', $booking)
+                    ->with('error', 'Это бронирование не может быть оплачено');
+            }
 
             $client = new PayPalHttpClient($this->client->environment);
             $request = new OrdersCaptureRequest($request->token);
@@ -154,8 +187,14 @@ class PaymentHotelController extends Controller
                 'booking_id' => $booking->id
             ]);
 
+            // Mark the booking as payment attempt exhausted
+            $booking->update([
+                'status' => 'payment_failed',
+                'payment_status' => 'failed'
+            ]);
+
             return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Ошибка при обработке платежа. Пожалуйста, свяжитесь с поддержкой.');
+                ->with('error', 'Ошибка при обработке платежа. Попытка оплаты исчерпана.');
 
         } catch (\Exception $e) {
             Log::error('Payment error', [

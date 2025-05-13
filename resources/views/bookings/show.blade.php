@@ -10,15 +10,18 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h3 class="mb-0">Детали бронирования</h3>
-                            <span class="badge bg-{{ $booking->status === 'confirmed' ? 'success' : ($booking->status === 'pending' ? 'warning' : 'danger') }}">
+                            <span class="badge bg-{{ $booking->status === 'confirmed' ? 'success' : (in_array($booking->status, ['pending', 'pending_payment']) ? 'warning' : 'danger') }}">
                             @switch($booking->status)
                                     @case('pending')
-                                    Ожидает подтверждения
+                                    Ожидает оплаты
+                                    @break
+                                    @case('pending_payment')
+                                    Ожидает оплаты
                                     @break
                                     @case('confirmed')
                                     Подтверждено
                                     @break
-                                    @case('cancelled')  
+                                    @case('cancelled')
                                     Отменено
                                     @break
                                 @endswitch
@@ -56,9 +59,12 @@
                         <div class="mb-4">
                             <h3>Статус бронирования</h3>
                             <p>
-                            <span class="badge bg-{{ $booking->status === 'confirmed' ? 'success' : ($booking->status === 'pending' ? 'warning' : 'danger') }}">
+                            <span class="badge bg-{{ $booking->status === 'confirmed' ? 'success' : (in_array($booking->status, ['pending', 'pending_payment']) ? 'warning' : 'danger') }}">
                                 @switch($booking->status)
                                     @case('pending')
+                                    Ожидает оплаты
+                                    @break
+                                    @case('pending_payment')
                                     Ожидает оплаты
                                     @break
                                     @case('confirmed')
@@ -86,7 +92,7 @@
                                         </button>
                                     </form>
 
-                                    @if($booking->status === 'pending')
+                                    @if($booking->status === 'pending' || $booking->status === 'pending_payment')
                                         <form action="{{ route('bookings.pay', $booking) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-success">
@@ -98,13 +104,16 @@
                                 </div>
                             @endif
 
-                            @if($booking->status === 'pending_payment')
-                                <div class="mb-3">
-                                    <a href="{{ route('payments.create', $booking) }}" class="btn btn-primary w-100" onclick="console.log('Payment button clicked')">
-                                        Оплатить через PayPal {{ number_format($booking->total_price / 450, 2) }} USD
-                                        <small class="d-block text-muted">({{ number_format($booking->total_price, 2) }} ₸)</small>
-                                    </a>
-                                </div>
+                            @if ($booking->payment_status === 'pending' || $booking->payment_status === 'pending_payment')
+                                <a href="{{ route('payments.create', $booking->id) }}" class="btn btn-primary">Оплатить</a>
+                            @else
+                                <p class="text-danger">
+                                    @if ($booking->payment_status === 'paid')
+                                        Оплата уже произведена.
+                                    @elseif ($booking->payment_status === 'failed')
+                                        Попытка оплаты исчерпана.
+                                    @endif
+                                </p>
                             @endif
 
                             <a href="{{ route('bookings.index') }}" class="btn btn-secondary">Назад к списку</a>

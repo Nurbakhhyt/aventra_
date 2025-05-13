@@ -26,10 +26,13 @@
                                     <div class="list-group-item">
                                         <div class="d-flex w-100 justify-content-between">
                                             <h5 class="mb-1">{{ $booking->hotel->name }}</h5>
-                                            <span class="badge bg-{{ $booking->status === 'confirmed' ? 'success' : ($booking->status === 'pending' ? 'warning' : 'danger') }}">
+                                            <span class="badge bg-{{ $booking->status === 'confirmed' ? 'success' : (in_array($booking->status, ['pending', 'pending_payment']) ? 'warning' : 'danger') }}">
                                             @switch($booking->status)
                                                     @case('pending')
-                                                    Ожидает подтверждения
+                                                    Ожидает оплаты
+                                                    @break
+                                                    @case('pending_payment')
+                                                    Ожидает оплаты
                                                     @break
                                                     @case('confirmed')
                                                     Подтверждено
@@ -53,7 +56,7 @@
                                             <a href="{{ route('bookings.show', $booking) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye"></i> Подробнее
                                             </a>
-                                            @if($booking->status === 'pending')
+                                            @if($booking->status === 'pending' || $booking->status === 'pending_payment')
                                                 <form action="{{ route('bookings.cancel', $booking) }}" method="POST" class="d-inline">
                                                     @csrf
                                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите отменить бронирование?')">
