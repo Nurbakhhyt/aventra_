@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-/*
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/email/verify', function () {
         return view('auth.verify-email');
@@ -70,10 +70,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/{booking}/pay/success', [PaymentHotelController::class, 'success'])->name('payments.success');
     Route::get('/bookings/{booking}/pay/cancel', [PaymentHotelController::class, 'cancel'])->name('payments.cancel');
 });
-*/
+
+
 
 /*
-
 Route::get('/', function () {
     return view('welcome');
 });
@@ -110,8 +110,8 @@ Route::resource('locations', LocationController::class);
 Route::resource('tours', TourController::class);
 
 Route::middleware('auth')->group(function () {
-    Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
-    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+    // Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+    // Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
     Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
     Route::resource('posts', PostController::class);
     Route::post('/comments', [CommentController::class, 'store']);

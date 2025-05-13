@@ -18,7 +18,7 @@
                                     @case('confirmed')
                                     Подтверждено
                                     @break
-                                    @case('cancelled')
+                                    @case('cancelled')  
                                     Отменено
                                     @break
                                 @endswitch

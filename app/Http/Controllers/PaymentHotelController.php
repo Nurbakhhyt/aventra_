@@ -125,7 +125,7 @@ class PaymentHotelController extends Controller
 
             if ($response->result->status === 'COMPLETED') {
                 DB::transaction(function () use ($booking, $response) {
-                    $payment = Payment::create([
+                    $payment = PaymentHotel::create([
                         'booking_id' => $booking->id,
                         'paypal_payment_id' => $response->result->id,
                         'amount' => $booking->total_price,
