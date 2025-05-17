@@ -15,6 +15,13 @@
 
     <!-- Scripts -->
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+        integrity="sha256-sA+e2e8S8/ehPLB/1I2rF6xHrvOnN+98vsClH2qP8Gc="
+        crossorigin=""
+    />
+
 </head>
 <body>
     <div id="app">

@@ -15,8 +15,8 @@ class HotelController extends Controller
     public function index()
     {
         $hotels = Hotel::paginate(10);
-        // return response()->json(['hotels' => $hotels]);
-       return view('hotels.index', compact('hotels'));
+         return response()->json(['hotels' => $hotels]);
+//       return view('hotels.index', compact('hotels'));
     }
 
     /**
@@ -85,8 +85,8 @@ class HotelController extends Controller
     public function show(Hotel $hotel)
     {
         $hotel->load('roomTypes');
-        // return response()->json(['hotels' => $hotel]);
-       return view('hotels.show', compact('hotel'));
+         return response()->json(['hotels' => $hotel]);
+//       return view('hotels.show', compact('hotel'));
     }
 
     /**
