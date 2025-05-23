@@ -9,6 +9,19 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
+    public function tourCreate(Request $request)
+    {
+        $request->validate([
+            'tour_id' => 'required|exists:tours,id'
+        ]);
+
+        $tour = Tour::with('location', 'user', 'images')->findOrFail($request->tour_id);
+
+        return view('bookingTour.create', compact('tour'));
+    }
+
+
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -44,10 +57,10 @@ class BookingController extends Controller
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        return response()->json([
-            'message' => 'Тур успешно забронирован!',
-            'booking' => $booking
-        ], 201);
+//         return response()->json([
+//             'message' => 'Тур успешно забронирован!',
+//             'booking' => $booking
+//         ], 201);
     }
 
 

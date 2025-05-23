@@ -61,7 +61,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Like::class);
     }
 
-    public function paymentsTour(){
+    public function paymentsTours(){
         return $this->hasMany(PaymentTour::class);
     }
 

@@ -23,8 +23,8 @@ class Booking extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function paymentsTour(){
-        return $this->hasMany(PaymentTour::class);
+    public function payment(){
+        return $this->hasOne(PaymentTour::class);
     }
 }
 
