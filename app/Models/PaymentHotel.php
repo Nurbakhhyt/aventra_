@@ -25,6 +25,6 @@ class PaymentHotel extends Model
 
     public function booking()
     {
-        return $this->belongsTo(BookingHotel::class, 'booking_id');
+        return $this->belongsTo(BookingHotel::class);
     }
 }

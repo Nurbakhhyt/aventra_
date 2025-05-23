@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 
-class BookingHotelController extends Controller
+class BookingHotelWebController extends Controller
 {
     /**
      * Отображает список всех бронирований
@@ -24,9 +24,9 @@ class BookingHotelController extends Controller
             ->with(['hotel', 'roomType'])
             ->latest()
             ->paginate(10);
-         return response()->json(['bookings' => $bookings]);
+//        return response()->json(['bookings' => $bookings]);
 
-//       return view('bookings.index', compact('bookings'));
+       return view('bookings.index', compact('bookings'));
     }
 
     /**
@@ -35,20 +35,20 @@ class BookingHotelController extends Controller
     public function step1()
     {
         $hotels = Hotel::all();
-         return response()->json(['hotels' => $hotels]);
+//        return response()->json(['hotels' => $hotels]);
 
-//       return view('bookings.step1', compact('hotels'));
+       return view('bookings.step1', compact('hotels'));
     }
 
     public function step2(Hotel $hotel)
     {
         $roomTypes = $hotel->roomTypes;
-         return response()->json([
-             'hotel' => $hotel,
-             'room_types' => $roomTypes
-         ]);
+//        return response()->json([
+//            'hotel' => $hotel,
+//            'room_types' => $roomTypes
+//        ]);
 
-//       return view('bookings.step2', compact('hotel', 'roomTypes'));
+       return view('bookings.step2', compact('hotel', 'roomTypes'));
     }
 
     public function create(Hotel $hotel, RoomType $roomType)
@@ -56,12 +56,12 @@ class BookingHotelController extends Controller
         if ($roomType->hotel_id !== $hotel->id) {
             abort(404);
         }
-         return response()->json([
-             'hotel' => $hotel,
-             'room_type' => $roomType,
-         ]);
+//        return response()->json([
+//            'hotel' => $hotel,
+//            'room_type' => $roomType,
+//        ]);
 
-//       return view('bookings.create', compact('hotel', 'roomType'));
+       return view('bookings.create', compact('hotel', 'roomType'));
     }
 
     /**
@@ -121,11 +121,11 @@ class BookingHotelController extends Controller
         }
 
         $booking->load(['hotel', 'roomType', 'user']);
-         return response()->json([
-             'booking' => $booking,
-         ]);
+//        return response()->json([
+//            'booking' => $booking,
+//        ]);
 
-//       return view('bookings.show', compact('booking'));
+       return view('bookings.show', compact('booking'));
     }
 
     /**
@@ -222,19 +222,13 @@ class BookingHotelController extends Controller
      */
     public function userBookings($userId)
     {
-        $userId = Auth::id(); // Авторизацияланған қолданушының ID-сі
-
-        if (!$userId) {
-            return response()->json(['error' => 'User not authenticated'], 401);
-        }
-
         $bookings = BookingHotel::where('user_id', $userId)
-            ->with(['hotel', 'room', 'payments'])
+            ->with(['hotel', 'roomType','payments'])
             ->paginate(10);
-
-        return response()->json([
-            'booking' => $bookings,
-        ]);
+//        return response()->json([
+//            'booking' => $bookings,
+//        ]);
+        return view('bookings.user', compact('bookings'));
     }
 
     /**
