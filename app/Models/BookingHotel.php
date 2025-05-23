@@ -45,7 +45,7 @@ class BookingHotel extends Model
 
     public function payments()
     {
-//        return $this->hasMany(PaymentHotel::class, 'booking_id');
+        return $this->hasMany(PaymentHotel::class, 'booking_id');
     }
 
     public function calculateTotalPrice()
