@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\BookingHotelController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\FavoriteTourController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\LikeController;
@@ -14,13 +15,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Controllers\CsrfCookieController;
-
+use App\Http\Controllers\Api\PlaceController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\TourController;
 
-/*
+
 
 //Login
 Route::post('/login', function (Request $request) {
@@ -64,14 +65,15 @@ Route::apiResource('tours', TourController::class);
 Route::get('/posts',[PostController::class,'index'])->name('posts.index');
 Route::get('/posts/{id}',[PostController::class,'show'])->name('posts.show');
 
-
+Route::get('/places', [PlaceController::class, 'index']);
+Route::get('/places/{id}', [PlaceController::class, 'show']);
 Route::resource('hotels', HotelController::class);
-
+Route::apiResource('events', EventController::class)->only(['index', 'show']);
 //Routes use auth
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
     Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
-//    Route::get('/bookings/user', [BookingController::class, 'userBookings'])->name('bookings.user');
+    Route::get('/bookings/user', [BookingController::class, 'userBookings'])->name('bookings.user');
 
     Route::get('/profile/{id}', [ProfileController::class, 'show'])->name('profile.show');
 
@@ -113,5 +115,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
 //Route::apiResource('posts', PostController::class);
 
-*/
+
 
