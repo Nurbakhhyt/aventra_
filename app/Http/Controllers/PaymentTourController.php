@@ -1,13 +1,12 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use App\Models\PaymentTour;
-use Srmklive\PayPal\Services\PayPal as PayPalClient;
 use Illuminate\Support\Facades\Auth;
+use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
 class PaymentTourController extends Controller
 {
@@ -16,26 +15,29 @@ class PaymentTourController extends Controller
         $this->middleware('auth');
     }
 
-    // Перенаправление на PayPal
+    /**
+     * Төлемге бағыттау
+     */
     public function pay($bookingId)
     {
-        $booking = Booking::with('tour')->where('id', $bookingId)
+        $booking = Booking::with('tour')
+            ->where('id', $bookingId)
             ->where('user_id', Auth::id())
-            ->where('status', 'pending') // можно менять под свои статусы
+            ->where('status', 'pending')
             ->firstOrFail();
 
+        // PayPal клиент орнату
         $paypal = new PayPalClient;
         $paypal->setApiCredentials(config('paypal'));
-        $token = $paypal->getAccessToken();
-        $paypal->setAccessToken($token);
+        $paypal->getAccessToken();
 
-        $amount = $booking->tour->price * $booking->seats; // расчёт полной суммы
+        $amount = $booking->tour->price * $booking->seats;
 
         $order = $paypal->createOrder([
             "intent" => "CAPTURE",
             "purchase_units" => [[
                 "amount" => [
-                    "currency_code" => "USD",
+                    "currency_code" => config('paypal.currency', 'USD'),
                     "value" => number_format($amount, 2, '.', '')
                 ]
             ]],
@@ -45,46 +47,51 @@ class PaymentTourController extends Controller
             ]
         ]);
 
-        // Сохраняем черновик платежа
+        // Төлем жазбасы
         PaymentTour::create([
             'user_id' => Auth::id(),
             'booking_id' => $booking->id,
             'status' => 'pending',
             'amount' => $amount,
-            'currency' => 'USD',
+            'currency' => config('paypal.currency', 'USD'),
             'paypal_response' => $order,
         ]);
 
+        // PayPal сілтемесіне бағыттау
         foreach ($order['links'] as $link) {
             if ($link['rel'] === 'approve') {
                 return redirect()->away($link['href']);
             }
         }
 
-        return redirect()->route('bookings.index')->with('error', 'Ошибка при создании оплаты.');
+        return redirect()->route('bookingTour.index')->with('error', 'PayPal сілтемесін жасау сәтсіз болды.');
     }
 
-    // Успешная оплата
+    /**
+     * Төлем сәтті болғанда
+     */
     public function success(Request $request)
     {
         $paypal = new PayPalClient;
         $paypal->setApiCredentials(config('paypal'));
-        $token = $paypal->getAccessToken();
-        $paypal->setAccessToken($token);
+        $paypal->getAccessToken();
 
         $response = $paypal->capturePaymentOrder($request->token);
 
-        if ($response['status'] === 'COMPLETED') {
-            $payment = PaymentTour::where('payment_id', $request->token)->first();
+        if (!isset($response['status']) || $response['status'] !== 'COMPLETED') {
+            return redirect()->route('bookingTour.index')->with('error', 'Төлем сәтсіз аяқталды.');
+        }
 
-            if (!$payment) {
-                // Поиск последней неподтверждённой записи
-                $payment = PaymentTour::where('user_id', Auth::id())
-                    ->where('status', 'pending')
-                    ->latest()
-                    ->first();
-            }
+        // Төлемді табу немесе ең соңғысын қолдану
+        $payment = PaymentTour::where('payment_id', $request->token)->first();
+        if (!$payment) {
+            $payment = PaymentTour::where('user_id', Auth::id())
+                ->where('status', 'pending')
+                ->latest()
+                ->first();
+        }
 
+        if ($payment) {
             $payment->update([
                 'status' => 'approved',
                 'payment_id' => $request->token,
@@ -92,19 +99,22 @@ class PaymentTourController extends Controller
                 'paypal_response' => $response,
             ]);
 
-            $payment->booking->update([
-                'status' => 'paid',
-            ]);
-
-            return redirect()->route('bookings.index')->with('success', 'Оплата прошла успешно!');
+            if ($payment->booking) {
+                $payment->booking->update([
+                    'status' => 'paid',
+                    'is_paid' => true,
+                ]);
+            }
         }
 
-        return redirect()->route('bookings.index')->with('error', 'Ошибка оплаты.');
+        return redirect()->route('bookingTour.index')->with('success', 'Оплата сәтті аяқталды!');
     }
 
-    // Отмена оплаты
+    /**
+     * Төлемнен бас тарту
+     */
     public function cancel()
     {
-        return redirect()->route('bookings.index')->with('error', 'Вы отменили оплату.');
+        return redirect()->route('bookingTour.index')->with('error', 'Сіз төлемнен бас тарттыңыз.');
     }
 }

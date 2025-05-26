@@ -27,18 +27,37 @@
 
         <div class="card">
             <div class="card-body">
-                <h4 class="card-title mb-4">Брондау формасы</h4>
+                <h4 class="card-title mb-4">Брондау және төлем</h4>
                 <form action="{{ route('bookings.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="tour_id" value="{{ $tour->id }}">
 
                     <div class="mb-3">
                         <label for="seats" class="form-label">Орын саны:</label>
-                        <input type="number" name="seats" id="seats" class="form-control" value="1" min="1" max="{{ $tour->volume }}" required>
+                        <input type="number" name="seats" id="seats" class="form-control" value="{{ old('seats', request('seats', 1)) }}" min="1" max="{{ $tour->volume }}" required>
                     </div>
 
-                    <button type="submit" class="btn btn-primary">Брондауды растау және төлеу</button>
+                    @php
+                        $seats = old('seats', request('seats', 1));
+                        $total = $seats * $tour->price;
+                    @endphp
+
+                    <div class="mb-3">
+                        <label class="form-label">Жалпы бағасы:</label>
+                        <div class="form-control bg-light">{{ $total }} ₸</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100">Брондау және төлеу</button>
                 </form>
+
+                @if(session('booking_id'))
+                    <div class="text-center mt-4">
+                        <a href="{{ route('paypal.pay', session('booking_id')) }}" class="btn btn-outline-primary">
+                            <img src="https://www.paypalobjects.com/webstatic/icon/pp258.png" alt="PayPal" style="height: 20px; margin-right: 8px;">
+                            PayPal арқылы төлеу
+                        </a>
+                    </div>
+                @endif
             </div>
         </div>
     </div>

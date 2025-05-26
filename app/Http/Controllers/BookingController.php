@@ -9,18 +9,28 @@ use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
+
+    public function index(){
+         $bookings = Booking::with('tour')
+                ->where('user_id', auth()->id())
+                ->latest()
+                ->get();
+
+         return view('bookingTour.index', compact('bookings'));
+    }
+
     public function tourCreate(Request $request)
     {
         $request->validate([
-            'tour_id' => 'required|exists:tours,id'
+            'tour_id' => 'required|exists:tours,id',
+            'seats' => 'nullable|integer|min:1'
         ]);
 
-        $tour = Tour::with('location', 'user', 'images')->findOrFail($request->tour_id);
+        $tour = Tour::with(['location', 'user', 'images'])->findOrFail($request->tour_id);
+        $seats = $request->seats ?? 1;
 
-        return view('bookingTour.create', compact('tour'));
+        return view('bookingTour.create', compact('tour', 'seats'));
     }
-
-
 
     public function store(Request $request)
     {
@@ -30,9 +40,8 @@ class BookingController extends Controller
         ]);
 
         $user = Auth::user();
-
         if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return redirect()->route('login')->with('error', 'Сіз кірмегенсіз.');
         }
 
         $tour = Tour::findOrFail($data['tour_id']);
@@ -45,51 +54,52 @@ class BookingController extends Controller
         $availableSeats = $tour->volume - $activeBookings;
 
         if ($availableSeats < $data['seats']) {
-            return response()->json(['message' => 'Недостаточно свободных мест для бронирования.'], 400);
+            return back()->with('error', 'Бұл турда жеткілікті орын жоқ.');
         }
 
-        // Бронь жасау
+        // Жаңа брондау жасау
         $booking = Booking::create([
             'user_id' => $user->id,
             'tour_id' => $tour->id,
             'seats' => $data['seats'],
             'is_paid' => false,
+            'status' => 'pending',
             'expires_at' => now()->addMinutes(15),
         ]);
 
-//         return response()->json([
-//             'message' => 'Тур успешно забронирован!',
-//             'booking' => $booking
-//         ], 201);
-    }
+        // PayPal төлемге дайындалу үшін сессияға сақтау
+        session(['booking_id' => $booking->id]);
 
+        return redirect()->route('bookingsTour.create', [
+            'tour_id' => $tour->id,
+            'seats' => $data['seats']
+        ])->with('success', 'Брондау сәтті жасалды! Енді төлем жасаңыз.');
+    }
 
     public function destroy(Booking $booking)
     {
         if ($booking->user_id !== auth()->id()) {
-            abort(403, 'Недостаточно прав для отмены этой брони.');
+            abort(403, 'Бұл брондауды жоюға құқығыңыз жоқ.');
         }
 
         $booking->delete();
 
-        return redirect()->route('tours.index')->with('success', 'Бронь успешно отменена.');
+        return redirect()->route('tours.index')->with('success', 'Брондау сәтті жойылды.');
     }
 
-    public function userBookings(Request $request)
+    public function userBookings()
     {
         $user = Auth::user();
 
         if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return redirect()->route('login');
         }
 
         $bookings = Booking::with('tour')
             ->where('user_id', $user->id)
+            ->latest()
             ->get();
 
-        return response()->json([
-            'bookings' => $bookings
-        ]);
+        return view('bookings.index', compact('bookings'));
     }
-
 }
