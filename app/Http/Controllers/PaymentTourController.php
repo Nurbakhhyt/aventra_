@@ -115,6 +115,24 @@ class PaymentTourController extends Controller
      */
     public function cancel()
     {
-        return redirect()->route('bookingTour.index')->with('error', 'Сіз төлемнен бас тарттыңыз.');
+        $user = Auth::user();
+        $bookingId = session('booking_id');
+
+        if ($user && $bookingId) {
+            $booking = \App\Models\Booking::where('id', $bookingId)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($booking) {
+                $booking->update([
+                    'status' => 'cancelled',
+                    'is_paid' => false,
+                ]);
+            }
+        }
+
+        return redirect()->route('bookingTour.index')
+            ->with('error', 'Сіз төлемнен бас тарттыңыз. Брондау жойылды.');
     }
+
 }

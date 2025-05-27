@@ -26,5 +26,11 @@ class Booking extends Model
     public function payment(){
         return $this->hasOne(PaymentTour::class);
     }
+
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value;
+        $this->attributes['is_paid'] = $value === 'paid';
+    }
 }
 

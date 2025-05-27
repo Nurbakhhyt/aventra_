@@ -44,7 +44,7 @@
 
                     <div class="mb-3">
                         <label class="form-label">Жалпы бағасы:</label>
-                        <div class="form-control bg-light">{{ $total }} ₸</div>
+                        <div class="form-control bg-light">{{ number_format($total / 520, 2) }} ₸</div>
                     </div>
 
                     <button type="submit" class="btn btn-success w-100">Брондау және төлеу</button>

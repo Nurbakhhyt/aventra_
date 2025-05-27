@@ -96,7 +96,7 @@
                                         <form action="{{ route('bookings.pay', $booking) }}" method="POST" class="d-inline">
                                             @csrf
                                             <button type="submit" class="btn btn-success">
-                                                Оплатить {{ number_format($booking->total_price / 450, 2) }} USD
+                                                Оплатить {{ number_format($booking->total_price / 520, 2) }} USD
                                                 <small class="d-block text-muted">{{ number_format($booking->total_price, 2) }} ₸</small>
                                             </button>
                                         </form>

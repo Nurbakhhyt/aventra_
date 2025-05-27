@@ -46,35 +46,36 @@ class BookingController extends Controller
 
         $tour = Tour::findOrFail($data['tour_id']);
 
-        // Қолжетімді орындарды тексеру
-        $activeBookings = Booking::where('tour_id', $tour->id)
+        // Қолжетімді орын тексеру
+        $activeSeats = Booking::where('tour_id', $tour->id)
             ->where('expires_at', '>', now())
+            ->where('status', 'pending')
             ->sum('seats');
 
-        $availableSeats = $tour->volume - $activeBookings;
+        $availableSeats = $tour->volume - $activeSeats;
 
         if ($availableSeats < $data['seats']) {
             return back()->with('error', 'Бұл турда жеткілікті орын жоқ.');
         }
 
-        // Жаңа брондау жасау
+        // Бронь жасау
         $booking = Booking::create([
             'user_id' => $user->id,
             'tour_id' => $tour->id,
             'seats' => $data['seats'],
-            'is_paid' => false,
             'status' => 'pending',
+            'is_paid' => false,
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        // PayPal төлемге дайындалу үшін сессияға сақтау
         session(['booking_id' => $booking->id]);
 
-        return redirect()->route('bookingsTour.create', [
+        return redirect()->route('bookingTour.index', [
             'tour_id' => $tour->id,
             'seats' => $data['seats']
-        ])->with('success', 'Брондау сәтті жасалды! Енді төлем жасаңыз.');
+        ])->with('success', 'Брондау сәтті жасалды. Енді төлем жасаңыз.');
     }
+
 
     public function destroy(Booking $booking)
     {
@@ -84,7 +85,7 @@ class BookingController extends Controller
 
         $booking->delete();
 
-        return redirect()->route('tours.index')->with('success', 'Брондау сәтті жойылды.');
+        return redirect()->route('bookingTour.index')->with('success', 'Брондау сәтті жойылды.');
     }
 
     public function userBookings()
