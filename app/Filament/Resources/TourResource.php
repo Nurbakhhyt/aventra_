@@ -17,6 +17,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\FileUpload;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Forms\Components\Checkbox;
+use Illuminate\Support\Facades\Auth;
 
 class TourResource extends Resource
 {
@@ -73,6 +75,11 @@ class TourResource extends Resource
                     ->image()
                     ->directory('tours') // Куда будут загружаться файлы
                     ->nullable(),
+
+                Checkbox::make('featured')
+                    ->label('Басты бетте көрсету')
+                    ->visible(fn () => in_array(Auth::user()->role, ['admin', 'moderator']))
+                    ->default(false),
             ]);
     }
 
@@ -110,6 +117,12 @@ class TourResource extends Resource
                 TextColumn::make('date')
                     ->label('Күні')
                     ->sortable(),
+
+                TextColumn::make('featured')
+                    ->label('Таңдаулы')
+                    ->badge()
+                    ->formatStateUsing(fn ($state) => $state ? 'Иә' : 'Жоқ')
+                    ->visible(fn () => Auth::user()->role === 'admin' || Auth::user()->role === 'moderator'),
 
                 ImageColumn::make('image')
                     ->label('Суреті')

@@ -19,7 +19,8 @@ class Tour extends Model
         'price',
         'volume',
         'date',
-        'image'
+        'image',
+        'featured'
     ];
 
     public function location(){
@@ -63,5 +64,11 @@ class Tour extends Model
     public function reviews(){
         return $this->hasMany(Review::class);
     }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('featured', true);
+    }
+
 
 }

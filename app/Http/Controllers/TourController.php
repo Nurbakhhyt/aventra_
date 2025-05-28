@@ -284,4 +284,18 @@ class TourController extends Controller
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
+
+     public function featured()
+        {
+            $tours = Tour::featured()
+                ->with('images')
+                ->latest()
+                ->take(10)
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $tours
+            ]);
+        }
 }
