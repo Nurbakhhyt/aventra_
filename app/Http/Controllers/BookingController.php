@@ -11,12 +11,12 @@ class BookingController extends Controller
 {
 
     public function index(){
-         $bookings = Booking::with('tour')
-                ->where('user_id', auth()->id())
-                ->latest()
-                ->get();
+        $bookings = Booking::with('tour')
+            ->where('user_id', auth()->id())
+            ->latest()
+            ->get();
 
-         return view('bookingTour.index', compact('bookings'));
+        return view('bookingTour.index', compact('bookings'));
     }
 
     public function tourCreate(Request $request)
@@ -101,6 +101,6 @@ class BookingController extends Controller
             ->latest()
             ->get();
 
-        return view('bookings.index', compact('bookings'));
+        return response()->json($bookings, 200);
     }
 }
