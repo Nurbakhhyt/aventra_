@@ -6,7 +6,7 @@ use App\Models\Booking;
 use App\Models\Tour;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+//
 class BookingController extends Controller
 {
     public function index()
