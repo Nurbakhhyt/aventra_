@@ -72,7 +72,7 @@ Route::get('/places', [PlaceController::class, 'index']);
 Route::get('/places/{id}', [PlaceController::class, 'show']);
 Route::resource('hotels', HotelController::class);
 Route::apiResource('events', EventController::class)->only(['index', 'show']);
-
+Route::get('/comments', [CommentController::class, 'index'])->name('comments.index');
 
 
 //Routes use auth

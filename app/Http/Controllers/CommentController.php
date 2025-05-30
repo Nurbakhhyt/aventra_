@@ -7,7 +7,18 @@ use Illuminate\Http\Request;
 
 class CommentController extends Controller
 {
-    // Добавить комментарий
+    public function index(Request $request)
+    {
+        $query = Comment::query()->with('user'); // Пікірмен бірге авторды да жүктеу
+
+        if ($request->filled('post_id')) {
+            $query->where('post_id', $request->input('post_id'));
+        }
+
+        $comments = $query->latest()->get(); // Ең жаңа пікірлерді бірінші көрсету
+
+        return response()->json($comments);
+    }
     public function store(Request $request)
     {
         $request->validate([
