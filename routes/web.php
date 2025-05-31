@@ -5,6 +5,7 @@ use App\Http\Controllers\BookingHotelController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\HotelController;
+use App\Http\Controllers\LangController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PaymentHotelController;
 use App\Http\Controllers\PaymentTourController;
@@ -36,7 +37,7 @@ Route::middleware(['auth'])->group(function () {
 
 Auth::routes();
 
-
+Route::get('/lang/{lang}', [LangController::class, 'switchLang'])->name('switch.lang');
 
 Route::resource('cities', CityController::class);
 Route::resource('locations', LocationController::class);
