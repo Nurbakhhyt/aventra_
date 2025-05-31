@@ -28,10 +28,12 @@ class PlaceResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')->required(),
+                TextInput::make('name_kz')->required(),
+                TextInput::make('name_en')->required(),
                 TextInput::make('city')->required(),
                 TextInput::make('country')->required(),
-                Textarea::make('description')->required(),
+                Textarea::make('description_kz')->required(),
+                Textarea::make('description_en')->required(),
 
                 // ❗ Тек бір ғана карта компоненті
                 View::make('forms.components.map-picker')->columnSpan('full'),
@@ -69,7 +71,8 @@ class PlaceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->searchable(),
+                TextColumn::make('name_kz')->searchable(),
+                TextColumn::make('name_en')->searchable(),
                 TextColumn::make('city'),
                 ImageColumn::make('images.0')->label('Басты сурет'),
             ])

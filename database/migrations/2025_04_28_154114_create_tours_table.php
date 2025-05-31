@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('tours', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
+            $table->string('name_kz');
+            $table->string('name_en');
+            $table->text('description_kz');
+            $table->text('description_en');
+            $table->boolean('featured')->default(false)->after('description');
             $table->foreignId('user_id')->nullable()->constrained()->onDelete('cascade');
             $table->foreignId('location_id')->nullable()->constrained('locations')->onDelete('set null');
             $table->decimal('price', 10,2);

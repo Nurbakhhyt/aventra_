@@ -10,7 +10,8 @@ return new class extends Migration
     {
         Schema::create('event_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique(); // Оқиға түрінің атауы (бірегей)
+            $table->string('name_kz')->unique(); // Оқиға түрінің атауы (бірегей)
+            $table->string('name_en')->unique(); // Оқиға түрінің атауы (бірегей)
             $table->timestamps();
         });
     }

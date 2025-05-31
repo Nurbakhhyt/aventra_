@@ -24,17 +24,22 @@ class LocationResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
+                TextInput::make('name_kz')
+                    ->label('Локация аты')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('name_en')
                     ->label('Локация аты')
                     ->required()
                     ->maxLength(255),
 
                 Select::make('city_id')
                     ->label('Қала')
-                    ->relationship('city', 'name')
+                    ->relationship('city', 'name_kz')
                     ->searchable()
                     ->nullable()
                     ->preload(),
+
             ]);
     }
 
@@ -42,12 +47,20 @@ class LocationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('name_kz')
                     ->label('Локация')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('name_en')
+                    ->label('Location')
+                    ->searchable()
+                    ->sortable(),
 
-                TextColumn::make('city.name')
+                TextColumn::make('city.name_kz')
+                    ->label('Қала')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('city.name_en')
                     ->label('Қала')
                     ->searchable()
                     ->sortable(),

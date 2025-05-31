@@ -31,14 +31,17 @@ class HotelResource extends Resource
             ->schema([
                 Section::make('Қонақ үй бойынша ақпарат')
                     ->schema([
-                        TextInput::make('name')->required()->maxLength(255),
-                        TextInput::make('address')->required()->maxLength(255),
-                        Select::make('city_id')->label('Қала')->relationship('city','name')
+                        TextInput::make('name_kz')->required()->maxLength(255),
+                        TextInput::make('name_en')->required()->maxLength(255),
+                        TextInput::make('address_kz')->required()->maxLength(255),
+                        TextInput::make('address_en')->required()->maxLength(255),
+                        Select::make('city_id')->label('Қала')->relationship('city','name_en')
                         ->searchable()
                         ->preload()
                         ->required(),
                         TextInput::make('country')->required()->maxLength(255),
-                        Textarea::make('description')->required(),
+                        Textarea::make('description_kz')->required(),
+                        Textarea::make('description_en')->required(),
                         TextInput::make('stars')->numeric()->minValue(1)->maxValue(5)->required(),
                         TextInput::make('price_per_night')->numeric()->minValue(0)->required(),
                         FileUpload::make('image')->image()->directory('hotels')->maxSize(2048),
@@ -50,11 +53,13 @@ class HotelResource extends Resource
                             ->relationship()
                             ->minItems(1)
                             ->schema([
-                                TextInput::make('name')->required()->maxLength(255),
+                                TextInput::make('name_kz')->required()->maxLength(255),
+                                TextInput::make('name_en')->required()->maxLength(255),
                                 TextInput::make('price_per_night')->required()->numeric()->minValue(0),
                                 TextInput::make('max_guests')->required()->numeric()->minValue(1),
                                 TextInput::make('available_rooms')->required()->numeric()->minValue(0),
-                                Textarea::make('description')->label('Сипаттамасы')->nullable(),
+                                Textarea::make('description_kz')->label('Сипаттамасы')->nullable(),
+                                Textarea::make('description_en')->label('Description')->nullable(),
                                 FileUpload::make('image')->label('Суреті')->image()->directory('room-types')->maxSize(2048),
                                 Toggle::make('has_breakfast')->label('Таңғы ас'),
                                 Toggle::make('has_wifi')->label('Wi-Fi'),
@@ -72,8 +77,9 @@ class HotelResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('city.name')
+                Tables\Columns\TextColumn::make('name_kz')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('name_en')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('city.name_en')
                     ->label('Қалалар')
                     ->searchable()
                     ->sortable(),

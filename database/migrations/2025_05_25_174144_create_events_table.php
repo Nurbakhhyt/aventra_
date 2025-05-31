@@ -11,15 +11,19 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // Оқиғаны қосқан қолданушы
-            $table->foreignId('city_id')->nullable()->constrained()->onDelete('set null'); // Қалаға байланысты (Location-ға емес, қалаға)
+            $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('set null'); // Қалаға байланысты (Location-ға емес, қалаға)
             $table->foreignId('event_type_id')->nullable()->constrained()->onDelete('set null'); // Оқиға түрі
 
-            $table->string('title'); // Оқиғаның тақырыбы
-            $table->text('description'); // Толық сипаттама
+            $table->string('title_kz'); // Оқиғаның тақырыбы
+            $table->string('title_en'); // Оқиғаның тақырыбы
+            $table->text('description_kz'); // Толық сипаттама
+            $table->text('description_en'); // Толық сипаттама
             $table->dateTime('start_date'); // Басталу күні мен уақыты
             $table->dateTime('end_date')->nullable(); // Аяқталу күні мен уақыты (міндетті емес)
-            $table->string('location_name')->nullable(); // Өтетін орынның атауы (мысалы, "Алматы Арена")
-            $table->string('address')->nullable(); // Толық мекенжайы
+            $table->string('location_name_kz')->nullable(); // Өтетін орынның атауы (мысалы, "Алматы Арена")
+            $table->string('location_name_en')->nullable(); // Өтетін орынның атауы (мысалы, "Алматы Арена")
+            $table->string('address_kz')->nullable(); // Толық мекенжайы
+            $table->string('address_en')->nullable(); // Толық мекенжайы
             $table->decimal('latitude', 10, 7)->nullable(); // Карта үшін ендік
             $table->decimal('longitude', 10, 7)->nullable(); // Карта үшін бойлық
             $table->string('price_info')->nullable(); // Баға ақпараты (мысалы, "Тегін", "5000 KZT", "Билеттер: www.ticket.kz")

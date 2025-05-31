@@ -32,12 +32,21 @@ class TourResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
+                TextInput::make('name_kz')
+                    ->label('Тур аты')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('name_en')
                     ->label('Тур аты')
                     ->required()
                     ->maxLength(255),
 
-                Textarea::make('description')
+                Textarea::make('description_kz')
+                    ->label('Тур сипаттамасы')
+                    ->required()
+                    ->maxLength(65535),
+
+                Textarea::make('description_en')
                     ->label('Тур сипаттамасы')
                     ->required()
                     ->maxLength(65535),
@@ -51,7 +60,7 @@ class TourResource extends Resource
 
                 Select::make('location_id')
                     ->label('Локация')
-                    ->relationship('location', 'name')
+                    ->relationship('location', 'name_en')
                     ->searchable()
                     ->nullable()
                     ->preload(),
@@ -93,7 +102,11 @@ class TourResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')
+                TextColumn::make('name_kz')
+                    ->label('Тур аты')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('name_en')
                     ->label('Тур аты')
                     ->searchable()
                     ->sortable(),
@@ -102,7 +115,7 @@ class TourResource extends Resource
                     ->label('Тур жетекшісі')
                     ->sortable(),
 
-                TextColumn::make('location.name')
+                TextColumn::make('location.name_en')
                     ->label('Локация')
                     ->sortable(),
 

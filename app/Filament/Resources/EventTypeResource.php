@@ -24,8 +24,14 @@ class EventTypeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('name_kz')
                     ->label('Атауы')
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+
+                Forms\Components\TextInput::make('name_en')
+                    ->label('Name')
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255),
@@ -36,8 +42,12 @@ class EventTypeResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                Tables\Columns\TextColumn::make('name_kz')
                     ->label('Атауы')
+                    ->searchable()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('name_en')
+                    ->label('Name')
                     ->searchable()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

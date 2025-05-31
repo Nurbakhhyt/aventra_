@@ -14,10 +14,12 @@ return new class extends Migration
         Schema::create('hotels', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('address')->nullable();
+            $table->string('address_kz')->nullable();
+            $table->string('address_en')->nullable();
             $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('cascade');
             $table->string('country')->default('Qazaqstan');
-            $table->text('description')->nullable();
+            $table->text('description_kz')->nullable();
+            $table->text('description_en')->nullable();
             $table->integer('stars')->default(3);
             $table->decimal('rating', 2, 1)->default(0.0);
             $table->decimal('price_per_night', 10, 2);

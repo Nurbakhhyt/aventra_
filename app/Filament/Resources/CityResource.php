@@ -25,8 +25,12 @@ class CityResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
+                TextInput::make('name_kz')
                     ->label('Қала атауы')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('name_en')
+                    ->label('City name')
                     ->required()
                     ->maxLength(255),
 
@@ -36,8 +40,11 @@ class CityResource extends Resource
                     ->image()
                     ->nullable(),
 
-                Textarea::make('description')
+                Textarea::make('description_kz')
                     ->label('Қала анықтамасы')
+                    ->nullable(),
+                Textarea::make('description_en')
+                    ->label('City description')
                     ->nullable(),
 
                 TextInput::make('city_code')
@@ -56,8 +63,23 @@ class CityResource extends Resource
                     ->label('Суреті')
                     ->circular(),
 
-                TextColumn::make('name')
+                TextColumn::make('name_kz')
                     ->label('Аты')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('name_en')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('description_kz')
+                    ->label('Сипаттамасы')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('description_en')
+                    ->label('Description')
                     ->searchable()
                     ->sortable(),
 

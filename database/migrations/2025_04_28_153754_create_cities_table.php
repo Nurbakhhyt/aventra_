@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name_kz');
+            $table->string('name_en');
             $table->string('image')->nullable();
-            $table->text('description')->nullable();
+            $table->text('description_kz')->nullable();
+            $table->text('description_en')->nullable();
             $table->string('city_code', 3)->unique();
             $table->timestamps();
         });

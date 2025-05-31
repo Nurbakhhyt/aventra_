@@ -31,13 +31,24 @@ class EventResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('title')
+                TextInput::make('title_kz')
                     ->label('Тақырыбы')
                     ->required()
                     ->maxLength(255),
 
-                Textarea::make('description')
+                TextInput::make('title_en')
+                    ->label('Title')
+                    ->required()
+                    ->maxLength(255),
+
+                Textarea::make('description_kz')
                     ->label('Сипаттамасы')
+                    ->required()
+                    ->rows(5)
+                    ->maxLength(65535),
+
+                Textarea::make('description_en')
+                    ->label('Description')
                     ->required()
                     ->rows(5)
                     ->maxLength(65535),
@@ -51,7 +62,7 @@ class EventResource extends Resource
 
                 Select::make('city_id')
                     ->label('Қаласы')
-                    ->relationship('city', 'name')
+                    ->relationship('city', 'name_en')
                     ->searchable()
                     ->nullable()
                     ->preload(),
@@ -71,13 +82,23 @@ class EventResource extends Resource
                     ->label('Аяқталу күні мен уақыты')
                     ->nullable(),
 
-                TextInput::make('location_name')
+                TextInput::make('location_name_kz')
                     ->label('Өтетін орын атауы')
                     ->nullable()
                     ->maxLength(255),
 
-                TextInput::make('address')
+                TextInput::make('location_name_en')
+                    ->label('Place')
+                    ->nullable()
+                    ->maxLength(255),
+
+                TextInput::make('address_kz')
                     ->label('Толық мекенжайы')
+                    ->nullable()
+                    ->maxLength(255),
+
+                TextInput::make('address_en')
+                    ->label('Address')
                     ->nullable()
                     ->maxLength(255),
 
@@ -137,21 +158,22 @@ class EventResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('title')
+                TextColumn::make('title_kz')
                     ->label('Тақырыбы')
                     ->searchable()
                     ->sortable(),
-
+                TextColumn::make('title_en')
+                    ->label('Title')
+                    ->searchable()
+                    ->sortable(),
                 TextColumn::make('user.name')
                     ->label('Қосушы')
                     ->sortable(),
-
                 TextColumn::make('eventType.name')
                     ->label('Түрі')
                     ->sortable(),
-
-                TextColumn::make('city.name') // City моделі бар болса
-                ->label('Қаласы')
+                TextColumn::make('city_id') // City моделі бар болса
+                    ->label('Қаласы')
                     ->sortable(),
 
                 TextColumn::make('start_date')

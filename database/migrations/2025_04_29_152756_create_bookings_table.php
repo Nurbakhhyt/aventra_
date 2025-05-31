@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('tour_id')->constrained()->onDelete('cascade');
             $table->integer('seats')->default(1);
+            $table->string('status')->default('pending');
             $table->boolean('is_paid')->default(false);
             $table->timestamp('expires_at'); // время истечения брони
             $table->timestamps();

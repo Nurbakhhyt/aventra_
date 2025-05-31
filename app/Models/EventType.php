@@ -9,7 +9,10 @@ class EventType extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name'];
+    protected $fillable = [
+    'name_kz',
+    'name_en',
+    ];
 
     public function events()
     {

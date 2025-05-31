@@ -12,8 +12,10 @@ class Tour extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'description',
+        'name_kz',
+        'name_en',
+        'description_kz',
+        'description_en',
         'user_id',
         'location_id',
         'price',

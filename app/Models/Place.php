@@ -31,10 +31,12 @@ class Place extends Model
     // app/Models/Place.php
 
     protected $fillable = [
-        'name',
+        'name_kz',
+        'name_en',
         'city',
         'country',
-        'description',
+        'description_kz',
+        'description_en',
         'images',
         'things_to_do',
         'lat', // 👉 МІНДЕТТІ

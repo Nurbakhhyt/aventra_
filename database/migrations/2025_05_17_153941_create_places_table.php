@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('places', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('city')->nullable();
+            $table->string('name_kz');
+            $table->string('name_en');
+            $table->foreignId('city_id')->nullable()->constrained('cities')->onDelete('cascade');
             $table->string('country')->default('Қазақстан');
-            $table->text('description')->nullable();
+            $table->text('description_kz')->nullable();
+            $table->text('description_en')->nullable();
             $table->float('rating')->default(0);
             $table->json('images')->nullable(); // Бірнеше суретті JSON форматында сақтау үшін
             $table->decimal('lat', 10, 7)->nullable();
