@@ -121,7 +121,7 @@ Route::middleware('auth:sanctum')->group(function () {
    Route::get('/paypal/success', [PaymentTourController::class, 'success'])->name('paypal.success');
    Route::get('/paypal/cancel', [PaymentTourController::class, 'cancel'])->name('paypal.cancel');
    Route::get('/bookings/tourCreate', [BookingController::class, 'tourCreate'])->name('bookingsTour.create');
-   Route::post('/bookings', [BookingController::class, 'store'])->name('bookings.store');
+   Route::post('/bookings_tours', [BookingController::class, 'store'])->name('bookings.store');
    Route::get('/booking_tours', [BookingController::class, 'index'])->name('bookingTour.index');
    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
 
