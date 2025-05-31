@@ -28,7 +28,7 @@
         <div class="card">
             <div class="card-body">
                 <h4 class="card-title mb-4">Брондау және төлем</h4>
-                <form action="{{ route('bookings.store') }}" method="POST">
+                <form action="{{ route('bookingsTour.store') }}" method="POST">
                     @csrf
                     <input type="hidden" name="tour_id" value="{{ $tour->id }}">
 
