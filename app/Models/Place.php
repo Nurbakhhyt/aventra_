@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Models;
-
+use App\Models\City;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -33,7 +33,7 @@ class Place extends Model
     protected $fillable = [
         'name_kz',
         'name_en',
-        'city',
+        'city_id',
         'country',
         'description_kz',
         'description_en',

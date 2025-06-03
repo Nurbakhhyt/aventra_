@@ -69,7 +69,7 @@ class EventResource extends Resource
 
                 Select::make('event_type_id')
                     ->label('Оқиға түрі')
-                    ->relationship('eventType', 'name')
+                    ->relationship('eventType', 'name_en')
                     ->searchable()
                     ->nullable()
                     ->preload(),

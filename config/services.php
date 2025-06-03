@@ -32,10 +32,26 @@ return [
     ],
 
     'paypal' => [
-        'client_id' => env('PAYPAL_CLIENT_ID'),
-        'secret' => env('PAYPAL_SECRET'),
-        'currency' => env('PAYPAL_CURRENCY', 'USD'),
-        'mode' => env('PAYPAL_MODE', 'live'), // или 'live' для продакшена
-    ],
+            'mode' => env('PAYPAL_MODE', 'sandbox'), // 'sandbox' немесе 'live'
+
+            // ✅ SANDBOX РЕЖИМІНЕ АРНАЛҒАН ДЕРЕКТЕР
+            'sandbox' => [
+                'client_id' => env('PAYPAL_SANDBOX_CLIENT_ID'),
+                'secret' => env('PAYPAL_SANDBOX_SECRET'),
+                // 'app_id' => '', // Қажет болса қосуға болады
+            ],
+
+            // ✅ LIVE РЕЖИМІНЕ АРНАЛҒАН ДЕРЕКТЕР
+            'live' => [
+                'client_id' => env('PAYPAL_LIVE_CLIENT_ID'),
+                'secret' => env('PAYPAL_LIVE_CLIENT_SECRET'),
+                // 'app_id' => '', // Қажет болса қосуға болады
+            ],
+
+            // ✅ Жалпы валюта, егер PaymentTourController-де қолданылса
+            'currency' => env('PAYPAL_CURRENCY', 'USD'),
+            // ✅ Айырбастау курсы, егер PaymentTourController-де қолданылса
+            'exchange_rate_to_usd' => env('PAYPAL_EXCHANGE_RATE_TO_USD', 450),
+        ],
 
 ];

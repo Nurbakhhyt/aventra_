@@ -26,7 +26,7 @@ class PostImageResource extends Resource
         return $form
             ->schema([
                 Select::make('post_id')
-                    ->relationship('post', 'title')
+                    ->relationship('post', 'content')
                     ->required()
                     ->label('Пост'),
 

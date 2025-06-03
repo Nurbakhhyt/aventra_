@@ -59,7 +59,7 @@
 //
 //
 // // Routes for payment and booking Tour
-//    Route::get('/paypal/pay/{booking}', [PaymentTourController::class, 'pay'])->name('paypal.pay');
+//    Route::get('/paypal/pay/{bookingId}', [PaymentTourController::class, 'pay'])->name('paypal.pay');
 //    Route::get('/paypal/success', [PaymentTourController::class, 'success'])->name('paypal.success');
 //    Route::get('/paypal/cancel', [PaymentTourController::class, 'cancel'])->name('paypal.cancel');
 //    Route::get('/bookings/tourCreate', [BookingController::class, 'tourCreate'])->name('bookingsTour.create');
@@ -99,5 +99,5 @@
 //
 //
 //
-
+//
 //

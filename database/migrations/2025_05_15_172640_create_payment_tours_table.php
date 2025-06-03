@@ -8,7 +8,7 @@ return new class extends Migration {
         Schema::create('payment_tours', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('booking_id')->constrained('bookings')->onDelete('cascade');
+            $table->foreignId('booking_id')->constrained('booking_tours');
             $table->string('payment_id')->nullable();         // PayPal Payment ID
             $table->string('payer_id')->nullable();           // PayPal Payer ID
             $table->string('status')->default('pending');     // pending, approved, failed

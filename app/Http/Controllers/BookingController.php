@@ -1,132 +1,218 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
-use App\Models\Booking;
+// use App\Models\Booking; // ✅ ЕСКЕРТУ: Егер бұл Booking моделі BookingHotel-мен ғана байланысты болса, бұл жолды өшіріңіз немесе BookingHotel деп өзгертіңіз
+use App\Models\BookingTour; // ✅ Жаңа BookingTour моделін импорттау
 use App\Models\Tour;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 class BookingController extends Controller
 {
-
-    public function index(){
-        $bookings = Booking::with('tour')
+    // API-дан қолданушының тур брондауларының тізімін алу
+    public function index()
+    {
+        $bookings = BookingTour::with('tour') // Booking орнына BookingTour
             ->where('user_id', auth()->id())
             ->latest()
             ->get();
 
-        return view('bookingTour.index', compact('bookings'));
+        return response()->json([
+            'success' => true,
+            'bookings' => $bookings
+        ]);
     }
 
+    // Тур брондау формасы үшін деректерді дайындау (фронтэндке JSON қайтарады)
     public function tourCreate(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'tour_id' => 'required|exists:tours,id',
             'seats' => 'nullable|integer|min:1'
         ]);
 
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Некорректные данные запроса.', 'errors' => $validator->errors()], 422);
+        }
+
         $tour = Tour::with(['location', 'user', 'images'])->findOrFail($request->tour_id);
         $seats = $request->seats ?? 1;
 
-        return view('bookingTour.create', compact('tour', 'seats'));
+        return response()->json([
+            'success' => true,
+            'tour' => $tour,
+            'seats' => $seats
+        ]);
     }
 
-    public function tourStore(Request $request)
+    // Жаңа тур брондауды сақтау
+    public function store(Request $request)
     {
-        $data = $request->validate([
+        Log::info('BookingController@store for Tour called', ['request_payload' => $request->all()]);
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
             'tour_id' => 'required|exists:tours,id',
-            'seats' => 'required|integer|min:1'
+            'booking_date' => 'required|date|after_or_equal:today',
+            'guests_count' => 'required|integer|min:1',
+            'notes' => 'nullable|string',
+            'total_price' => 'required|numeric|min:0',
+            'status' => 'nullable|string|in:pending,confirmed,cancelled,completed,failed',
         ]);
+
+        if ($validator->fails()) {
+            Log::error('Tour booking validation failed', ['errors' => $validator->errors()]);
+            return response()->json(['success' => false, 'message' => 'Валидация қатесі.', 'errors' => $validator->errors()], 422);
+        }
 
         $user = Auth::user();
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Сіз кірмегенсіз.');
+        // user_id сұраудағы user_id-мен сәйкес келетінін тексереді, қауіпсіздік үшін
+        if (!$user || $user->id != $request->user_id) {
+            return response()->json(['success' => false, 'message' => 'Сіз кірмегенсіз немесе рұқсатыңыз жоқ.'], 401);
         }
 
-        $tour = Tour::findOrFail($data['tour_id']);
+        try {
+            DB::beginTransaction();
 
-        // Қолжетімді орын тексеру
-        $activeSeats = Booking::where('tour_id', $tour->id)
-            ->where('expires_at', '>', now())
-            ->where('status', 'pending')
-            ->sum('seats');
+            $tour = Tour::findOrFail($request->tour_id);
 
-        $availableSeats = $tour->volume - $activeSeats;
+            // Қолжетімді орын тексеру
+            $activeBookedSeats = BookingTour::where('tour_id', $tour->id)
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->where('booking_date', $request->booking_date)
+                ->sum('guests_count');
 
-        if ($availableSeats < $data['seats']) {
-            return back()->with('error', 'Бұл турда жеткілікті орын жоқ.');
+            $availableSeats = $tour->volume - $activeBookedSeats;
+
+            if ($availableSeats < $request->guests_count) {
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Бұл турда жеткілікті орын жоқ немесе бұл күнге орындар толған.'], 400);
+            }
+
+            // Бағаны бэкэндте қайта есептеу және фронтэндпен сәйкестігін тексеру
+            $calculatedPrice = $tour->price * $request->guests_count;
+            if (abs($calculatedPrice - $request->total_price) > 0.01) {
+                Log::warning('Frontend total price mismatch for tour booking', [
+                    'frontend_price' => $request->total_price,
+                    'calculated_price' => $calculatedPrice,
+                    'tour_id' => $tour->id,
+                    'booking_date' => $request->booking_date
+                ]);
+                DB::rollBack();
+                return response()->json(['success' => false, 'message' => 'Баға сәйкес келмейді. Қайта тексеріңіз.'], 400);
+            }
+
+            // Бронь жасау (BookingTour моделін қолданамыз)
+            $booking = BookingTour::create([
+                'user_id' => $user->id,
+                'tour_id' => $tour->id,
+                'booking_date' => $request->booking_date,
+                'guests_count' => $request->guests_count,
+                'notes' => $request->notes,
+                'total_price' => $calculatedPrice,
+                'status' => $request->status ?? 'pending',
+                'payment_status' => 'unpaid',
+                // 'expires_at' => now()->addMinutes(15), // Егер booking_tours кестесінде expires_at болса
+            ]);
+
+            // ✅ Турдың қолжетімді орындарын азайту
+            // Егер `volume` турдың қолжетімді орындар саны болса және броньдалғанда азаюы керек болса
+            $tour->decreaseVolume($request->guests_count);
+
+            DB::commit();
+            Log::info('Tour booking created successfully', ['booking_id' => $booking->id]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Брондау сәтті жасалды. Енді төлем жасаңыз.',
+                'booking' => $booking // Фронтэндке брондау объектісін қайтарамыз
+            ], 201);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error creating tour booking', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'request_payload' => $request->all()
+            ]);
+            return response()->json(['success' => false, 'message' => 'Брондау кезінде қате шықты. Қайтадан көріңіз.'], 500);
         }
-
-        // Бронь жасау
-        $booking = Booking::create([
-            'user_id' => $user->id,
-            'tour_id' => $tour->id,
-            'seats' => $data['seats'],
-            'status' => 'pending',
-            'is_paid' => false,
-            'expires_at' => now()->addMinutes(15),
-        ]);
-
-        session(['booking_id' => $booking->id]);
-
-        return redirect()->route('bookingTour.index', [
-            'tour_id' => $tour->id,
-            'seats' => $data['seats']
-        ])->with('success', 'Брондау сәтті жасалды. Енді төлем жасаңыз.');
     }
 
-
-    public function destroy(Booking $booking)
+    // Тур брондауды жою (BookingTour моделін қолданамыз)
+    public function destroy(BookingTour $booking) // Booking орнына BookingTour
     {
         if ($booking->user_id !== auth()->id()) {
-            abort(403, 'Бұл брондауды жоюға құқығыңыз жоқ.');
+            return response()->json(['success' => false, 'message' => 'Бұл брондауды жоюға құқығыңыз жоқ.'], 403);
         }
+
+        // ✅ Турдың қолжетімді орындарын арттыру, егер бронь жойылса
+        // $booking->tour->increaseVolume($booking->guests_count); // Егер tour моделінде осындай әдіс болса
 
         $booking->delete();
 
-        return redirect()->route('bookingTour.index')->with('success', 'Брондау сәтті жойылды.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Брондау сәтті жойылды.'
+        ]);
     }
 
+    // Қолданушының тур брондауларын алу (BookingTour моделін қолданамыз)
     public function userBookings()
     {
         $user = Auth::user();
 
         if (!$user) {
-            return redirect()->route('login');
+            return response()->json(['success' => false, 'message' => 'Сіз кірмегенсіз.'], 401);
         }
 
-        $bookings = Booking::with('tour')
+        $bookings = BookingTour::with('tour') // Booking орнына BookingTour
             ->where('user_id', $user->id)
             ->latest()
             ->get();
 
-        return response()->json($bookings, 200);
+        return response()->json([
+            'success' => true,
+            'bookings' => $bookings
+        ]);
+    }
+
+    // Тур брондау деталын көрсету
+    public function show(BookingTour $booking)
+    {
+        if ($booking->user_id !== auth()->id()) {
+            return response()->json(['success' => false, 'message' => 'Бұл брондауды көруге құқығыңыз жоқ.'], 403);
+        }
+        $booking->load('tour.location', 'tour.user'); // Қатынастарды жүктеу
+        return response()->json(['success' => true, 'booking' => $booking], 200);
     }
 }
 
 
+
+//
+//
 // namespace App\Http\Controllers;
 //
 // use App\Models\Booking;
 // use App\Models\Tour;
 // use Illuminate\Http\Request;
 // use Illuminate\Support\Facades\Auth;
-// //
+//
 // class BookingController extends Controller
 // {
-//     public function index()
-//     {
+//
+//     public function index(){
 //         $bookings = Booking::with('tour')
 //             ->where('user_id', auth()->id())
 //             ->latest()
 //             ->get();
 //
-//         return response()->json([
-//             'success' => true,
-//             'bookings' => $bookings
-//         ]);
+//         return view('bookingTour.index', compact('bookings'));
 //     }
 //
 //     public function tourCreate(Request $request)
@@ -139,14 +225,10 @@ class BookingController extends Controller
 //         $tour = Tour::with(['location', 'user', 'images'])->findOrFail($request->tour_id);
 //         $seats = $request->seats ?? 1;
 //
-//         return response()->json([
-//             'success' => true,
-//             'tour' => $tour,
-//             'seats' => $seats
-//         ]);
+//         return view('bookingTour.create', compact('tour', 'seats'));
 //     }
 //
-//     public function store(Request $request)
+//     public function tourStore(Request $request)
 //     {
 //         $data = $request->validate([
 //             'tour_id' => 'required|exists:tours,id',
@@ -155,11 +237,12 @@ class BookingController extends Controller
 //
 //         $user = Auth::user();
 //         if (!$user) {
-//             return response()->json(['success' => false, 'message' => 'Сіз кірмегенсіз.'], 401);
+//             return redirect()->route('login')->with('error', 'Сіз кірмегенсіз.');
 //         }
 //
 //         $tour = Tour::findOrFail($data['tour_id']);
 //
+//         // Қолжетімді орын тексеру
 //         $activeSeats = Booking::where('tour_id', $tour->id)
 //             ->where('expires_at', '>', now())
 //             ->where('status', 'pending')
@@ -168,9 +251,10 @@ class BookingController extends Controller
 //         $availableSeats = $tour->volume - $activeSeats;
 //
 //         if ($availableSeats < $data['seats']) {
-//             return response()->json(['success' => false, 'message' => 'Бұл турда жеткілікті орын жоқ.'], 400);
+//             return back()->with('error', 'Бұл турда жеткілікті орын жоқ.');
 //         }
 //
+//         // Бронь жасау
 //         $booking = Booking::create([
 //             'user_id' => $user->id,
 //             'tour_id' => $tour->id,
@@ -182,25 +266,22 @@ class BookingController extends Controller
 //
 //         session(['booking_id' => $booking->id]);
 //
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Брондау сәтті жасалды. Енді төлем жасаңыз.',
-//             'booking' => $booking
-//         ]);
+//         return redirect()->route('bookingTour.index', [
+//             'tour_id' => $tour->id,
+//             'seats' => $data['seats']
+//         ])->with('success', 'Брондау сәтті жасалды. Енді төлем жасаңыз.');
 //     }
+//
 //
 //     public function destroy(Booking $booking)
 //     {
 //         if ($booking->user_id !== auth()->id()) {
-//             return response()->json(['success' => false, 'message' => 'Құқығыңыз жоқ.'], 403);
+//             abort(403, 'Бұл брондауды жоюға құқығыңыз жоқ.');
 //         }
 //
 //         $booking->delete();
 //
-//         return response()->json([
-//             'success' => true,
-//             'message' => 'Брондау сәтті жойылды.'
-//         ]);
+//         return redirect()->route('bookingTour.index')->with('success', 'Брондау сәтті жойылды.');
 //     }
 //
 //     public function userBookings()
@@ -208,7 +289,7 @@ class BookingController extends Controller
 //         $user = Auth::user();
 //
 //         if (!$user) {
-//             return response()->json(['success' => false, 'message' => 'Сіз кірмегенсіз.'], 401);
+//             return redirect()->route('login');
 //         }
 //
 //         $bookings = Booking::with('tour')
@@ -216,9 +297,123 @@ class BookingController extends Controller
 //             ->latest()
 //             ->get();
 //
-//         return response()->json([
-//             'success' => true,
-//             'bookings' => $bookings
-//         ]);
+//         return response()->json($bookings, 200);
 //     }
 // }
+//
+//
+// // namespace App\Http\Controllers;
+// //
+// // use App\Models\Booking;
+// // use App\Models\Tour;
+// // use Illuminate\Http\Request;
+// // use Illuminate\Support\Facades\Auth;
+// // //
+// // class BookingController extends Controller
+// // {
+// //     public function index()
+// //     {
+// //         $bookings = Booking::with('tour')
+// //             ->where('user_id', auth()->id())
+// //             ->latest()
+// //             ->get();
+// //
+// //         return response()->json([
+// //             'success' => true,
+// //             'bookings' => $bookings
+// //         ]);
+// //     }
+// //
+// //     public function tourCreate(Request $request)
+// //     {
+// //         $request->validate([
+// //             'tour_id' => 'required|exists:tours,id',
+// //             'seats' => 'nullable|integer|min:1'
+// //         ]);
+// //
+// //         $tour = Tour::with(['location', 'user', 'images'])->findOrFail($request->tour_id);
+// //         $seats = $request->seats ?? 1;
+// //
+// //         return response()->json([
+// //             'success' => true,
+// //             'tour' => $tour,
+// //             'seats' => $seats
+// //         ]);
+// //     }
+// //
+// //     public function store(Request $request)
+// //     {
+// //         $data = $request->validate([
+// //             'tour_id' => 'required|exists:tours,id',
+// //             'seats' => 'required|integer|min:1'
+// //         ]);
+// //
+// //         $user = Auth::user();
+// //         if (!$user) {
+// //             return response()->json(['success' => false, 'message' => 'Сіз кірмегенсіз.'], 401);
+// //         }
+// //
+// //         $tour = Tour::findOrFail($data['tour_id']);
+// //
+// //         $activeSeats = Booking::where('tour_id', $tour->id)
+// //             ->where('expires_at', '>', now())
+// //             ->where('status', 'pending')
+// //             ->sum('seats');
+// //
+// //         $availableSeats = $tour->volume - $activeSeats;
+// //
+// //         if ($availableSeats < $data['seats']) {
+// //             return response()->json(['success' => false, 'message' => 'Бұл турда жеткілікті орын жоқ.'], 400);
+// //         }
+// //
+// //         $booking = Booking::create([
+// //             'user_id' => $user->id,
+// //             'tour_id' => $tour->id,
+// //             'seats' => $data['seats'],
+// //             'status' => 'pending',
+// //             'is_paid' => false,
+// //             'expires_at' => now()->addMinutes(15),
+// //         ]);
+// //
+// //         session(['booking_id' => $booking->id]);
+// //
+// //         return response()->json([
+// //             'success' => true,
+// //             'message' => 'Брондау сәтті жасалды. Енді төлем жасаңыз.',
+// //             'booking' => $booking
+// //         ]);
+// //     }
+// //
+// //     public function destroy(Booking $booking)
+// //     {
+// //         if ($booking->user_id !== auth()->id()) {
+// //             return response()->json(['success' => false, 'message' => 'Құқығыңыз жоқ.'], 403);
+// //         }
+// //
+// //         $booking->delete();
+// //
+// //         return response()->json([
+// //             'success' => true,
+// //             'message' => 'Брондау сәтті жойылды.'
+// //         ]);
+// //     }
+// //
+// //     public function userBookings()
+// //     {
+// //         $user = Auth::user();
+// //
+// //         if (!$user) {
+// //             return response()->json(['success' => false, 'message' => 'Сіз кірмегенсіз.'], 401);
+// //         }
+// //
+// //         $bookings = Booking::with('tour')
+// //             ->where('user_id', $user->id)
+// //             ->latest()
+// //             ->get();
+// //
+// //         return response()->json([
+// //             'success' => true,
+// //             'bookings' => $bookings
+// //         ]);
+// //     }
+// // }

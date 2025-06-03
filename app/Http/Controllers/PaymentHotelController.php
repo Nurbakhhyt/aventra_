@@ -8,9 +8,10 @@ use Illuminate\Http\Request;
 use PayPalCheckoutSdk\Core\PayPalHttpClient;
 use PayPalCheckoutSdk\Core\ProductionEnvironment;
 use PayPalCheckoutSdk\Orders\OrdersCreateRequest;
-use PayPalCheckoutSdk\Orders\OrdersCaptureRequest;
+use PayPalCheckoutSdk\Orders\OrdersCaptureRequest; // OrdersCaptureRequest импорттауды ұмытпаңыз
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use PayPalCheckoutSdk\Core\SandboxEnvironment;
 
 class PaymentHotelController extends Controller
 {
@@ -18,17 +19,28 @@ class PaymentHotelController extends Controller
     private $environment;
 
     public function __construct()
-    {
-        $this->environment = new ProductionEnvironment(
-            config('services.paypal.client_id'),
-            config('services.paypal.secret')
-        );
+        {
+            $mode = config('services.paypal.mode');
+            if ($mode === 'live') {
+                $this->environment = new ProductionEnvironment(
+                    config('services.paypal.client_id'),
+                    config('services.paypal.secret')
+                );
+            } else {
+                // ✅ SandboxEnvironment класының қолданылуы
+                $this->environment = new SandboxEnvironment(
+                    config('services.paypal.client_id'),
+                    config('services.paypal.secret')
+                );
+            }
+            $this->client = new PayPalHttpClient($this->environment);
+            Log::info("PayPal client initialized in {$mode} mode");
+        }
 
-        $this->client = new PayPalHttpClient($this->environment);
 
-        Log::info('PayPal client initialized in production mode');
-    }
-
+    // create әдісі PayPal-дың "Smart Button"-дарында қолданылмауы мүмкін,
+    // себебі createOrder фронтэндте жасалады
+    // Алайда, егер сіз бұл маршрутты бэкэндтен заказ құру үшін пайдалансаңыз, ол қалады.
     public function create(BookingHotel $booking)
     {
         try {
@@ -48,41 +60,47 @@ class PaymentHotelController extends Controller
                         'currency_code' => 'USD',
                         'value' => round($booking->total_price / 450, 2)
                     ],
-                    'description' => "Бронирование номера {$booking->roomType->name} в отеле {$booking->hotel->name}"
+                    'description' => "Бронирование номера {$booking->roomType->name_en} в отеле {$booking->hotel->name}" // ✅ name_en қолдану, өйткені PayPal ағылшыншаны жақсы көреді
                 ]],
                 'application_context' => [
+                    // PayPalButtons қолданылғанда бұл URL-дар әдетте қолданылмайды
                     'cancel_url' => route('bookings.show', $booking),
                     'return_url' => route('payments.success', ['booking' => $booking->id, 'token' => '{token}'])
                 ]
             ];
 
-            Log::info('PayPal request', [
+            Log::info('PayPal create order request body', [
                 'request_body' => json_encode($request->body)
             ]);
 
             $response = $this->client->execute($request);
 
-            Log::info('PayPal response', [
+            Log::info('PayPal create order response', [
                 'status' => $response->statusCode,
                 'id' => $response->result->id,
                 'links' => json_encode($response->result->links)
             ]);
 
+            // Егер бұл create әдісі бэкэндтен шақырылып, кейін PayPal-ға бағыттау үшін қолданылса
             foreach ($response->result->links as $link) {
                 if ($link->rel === 'approve') {
-                    return redirect($link->href);
+                    // Бұл жерде тек JSON жауабын қайтару керек, фронтэнд оны пайдаланады
+                    // redirect($link->href); // Бұл тек бэкэнд редиректі үшін
+                    return response()->json([
+                        'orderID' => $response->result->id,
+                        'approveURL' => $link->href
+                    ]);
                 }
             }
 
-            Log::error('No approval URL found in PayPal response', [
+            Log::error('No approval URL found in PayPal response from create method', [
                 'response' => json_encode($response->result)
             ]);
 
-            return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Ошибка при создании платежа. Пожалуйста, попробуйте позже.');
+            return response()->json(['error' => 'No approval URL from PayPal'], 500); // ✅ JSON жауап
 
         } catch (\Exception $e) {
-            Log::error('Payment creation error', [
+            Log::error('Payment creation error (create method)', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'booking_id' => $booking->id
@@ -98,73 +116,57 @@ class PaymentHotelController extends Controller
                 $errorMessage = 'Платеж был отклонен. Пожалуйста, проверьте данные вашей карты.';
             }
 
-            return redirect()->route('bookings.show', $booking)
-                ->with('error', $errorMessage);
+            return response()->json(['error' => $errorMessage], 500); // ✅ JSON жауап
         }
     }
 
+    // success әдісі PayPal-дың return_url арқылы шақырғанда жұмыс істейді.
+    // PayPalButtons қолданғанда, бұл әдіс әдетте қолданылмайды.
     public function success(Request $request, BookingHotel $booking)
     {
-        try {
-            Log::info('Processing payment success', [
+        Log::info('Old success method called (likely from a direct redirect)', [
+            'booking_id' => $booking->id,
+            'token' => $request->token,
+        ]);
+        // Бұл жерде бұрынғы логиканы қалдыра аласыз,
+        // бірақ назарды handleFrontendPaymentSuccess әдісіне аудару керек.
+        return redirect()->route('bookings.show', $booking)
+            ->with('info', 'Төлемді растау процесі аяқталды. Мәліметтерді тексеріңіз.');
+    }
+
+    public function handleFrontendPaymentSuccess(Request $request, BookingHotel $booking)
+        {
+            Log::info('Handle Frontend Payment Success method called', [
                 'booking_id' => $booking->id,
-                'token' => $request->token,
-                'booking_status' => $booking->status,
-                'payment_status' => $booking->payment_status
+                'paypal_order_id' => $request->paypal_order_id,
+                'payer_id' => $request->payer_id,
+                'request_details' => json_encode($request->all()) // Толық сұрау деректерін логқа жазу
             ]);
 
-            // Check if the booking is already paid
-            if ($booking->payment_status === 'paid') {
-                Log::warning('Attempt to pay an already paid booking', [
-                    'booking_id' => $booking->id
-                ]);
+            try {
+                // Броньның статусын тексеру (қайта төлеудің алдын алу)
+                if ($booking->payment_status === 'paid' || $booking->status === 'confirmed') {
+                    Log::warning('Attempt to pay an already paid/confirmed booking via frontend handler', [
+                        'booking_id' => $booking->id
+                    ]);
+                    return response()->json(['success' => false, 'message' => 'Оплата уже была произведена или бронирование подтверждено.'], 409);
+                }
 
-                return redirect()->route('bookings.show', $booking)
-                    ->with('error', 'Оплата уже была произведена. Повторная оплата невозможна.');
-            }
+                // PayPal-дан келген соманы алу
+                $paypalAmount = $request->payment_details['purchase_units'][0]['amount']['value'] ?? null;
+                if (is_null($paypalAmount)) {
+                    Log::error('PayPal amount not found in payment_details', ['request_details' => json_encode($request->all())]);
+                    throw new \Exception('PayPal amount not found in payment details.');
+                }
 
-            // Validate the token parameter
-            if (empty($request->token) || !preg_match('/^[A-Z0-9]+$/', $request->token)) {
-                Log::error('Invalid or missing token', [
-                    'booking_id' => $booking->id,
-                    'token' => $request->token
-                ]);
-
-                return redirect()->route('bookings.show', $booking)
-                    ->with('error', 'Неверный токен. Пожалуйста, попробуйте снова.');
-            }
-
-            // Проверяем, что бронирование находится в статусе, который можно оплатить
-            if (!in_array($booking->status, ['pending', 'pending_payment'])) {
-                Log::warning('Attempt to pay booking with invalid status', [
-                    'booking_id' => $booking->id,
-                    'status' => $booking->status
-                ]);
-
-                return redirect()->route('bookings.show', $booking)
-                    ->with('error', 'Это бронирование не может быть оплачено');
-            }
-
-            $client = new PayPalHttpClient($this->client->environment);
-            $request = new OrdersCaptureRequest($request->token);
-
-            $response = $client->execute($request);
-
-            Log::info('PayPal response', [
-                'status' => $response->result->status,
-                'id' => $response->result->id,
-                'details' => json_encode($response->result)
-            ]);
-
-            if ($response->result->status === 'COMPLETED') {
-                DB::transaction(function () use ($booking, $response) {
+                DB::transaction(function () use ($booking, $request, $paypalAmount) {
                     $payment = PaymentHotel::create([
                         'booking_id' => $booking->id,
-                        'paypal_payment_id' => $response->result->id,
-                        'amount' => $booking->total_price,
-                        'currency' => 'KZT',
+                        'paypal_payment_id' => $request->paypal_order_id,
+                        'amount' => $paypalAmount, // ✅ PayPal-дан келген нақты USD сомасын сақтау
+                        'currency' => 'USD', // ✅ PayPal валютасын сақтау
                         'status' => 'paid',
-                        'payment_details' => json_encode($response->result)
+                        'payment_details' => json_encode($request->payment_details)
                     ]);
 
                     $booking->update([
@@ -172,41 +174,40 @@ class PaymentHotelController extends Controller
                         'payment_status' => 'paid'
                     ]);
 
-                    Log::info('Payment completed successfully', [
+                    Log::info('Payment completed successfully via frontend handler', [
                         'booking_id' => $booking->id,
-                        'payment_id' => $payment->id
+                        'payment_id' => $payment->id,
+                        'paypal_order_id' => $request->paypal_order_id,
+                        'captured_amount_usd' => $paypalAmount
                     ]);
                 });
 
-                return redirect()->route('bookings.show', $booking)
-                    ->with('success', 'Оплата прошла успешно! Бронирование подтверждено.');
+                return response()->json(['success' => true, 'message' => 'Оплата прошла успешно! Бронирование подтверждено.']);
+
+            } catch (\Throwable $e) { // ✅ \Throwable қолданамыз, себебі бұл барлық қателерді (Exception және Error) қабылдайды
+                Log::error('Payment processing error (frontend handler)', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString(),
+                    'booking_id' => $booking->id,
+                    'request_payload' => json_encode($request->all()) // Қате кезінде payload-ты да логқа жазу
+                ]);
+
+                // Төлем сәтсіз болса, бронь статусын жаңарту (егер әлі pending болса)
+                if ($booking->status === 'pending') {
+                    $booking->update([
+                        'status' => 'payment_failed',
+                        'payment_status' => 'failed'
+                    ]);
+                }
+
+                $errorMessage = 'Ошибка при обработке платежа. Пожалуйста, свяжитесь с поддержкой.';
+                if (strpos($e->getMessage(), 'SQLSTATE') !== false) {
+                     $errorMessage = 'Ошибка базы данных при сохранении платежа. Пожалуйста, сообщите об этом администратору.';
+                }
+
+                return response()->json(['success' => false, 'message' => $errorMessage], 500);
             }
-
-            Log::warning('Payment not completed', [
-                'status' => $response->result->status,
-                'booking_id' => $booking->id
-            ]);
-
-            // Mark the booking as payment attempt exhausted
-            $booking->update([
-                'status' => 'payment_failed',
-                'payment_status' => 'failed'
-            ]);
-
-            return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Ошибка при обработке платежа. Попытка оплаты исчерпана.');
-
-        } catch (\Exception $e) {
-            Log::error('Payment error', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString(),
-                'booking_id' => $booking->id
-            ]);
-
-            return redirect()->route('bookings.show', $booking)
-                ->with('error', 'Ошибка при обработке платежа. Пожалуйста, свяжитесь с поддержкой.');
         }
-    }
 
     public function cancel(BookingHotel $booking)
     {
