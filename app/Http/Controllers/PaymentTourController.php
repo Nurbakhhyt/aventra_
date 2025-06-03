@@ -47,6 +47,11 @@ class PaymentTourController extends Controller
             ]
         ]);
 
+        if (!isset($order['links']) || !is_array($order['links'])) {
+            \Log::error('PayPal createOrder response missing links', ['response' => $order]);
+            return redirect()->route('bookingTour.index')->with('error', 'Ошибка при создании платежа в PayPal.');
+        }
+
         // Төлем жазбасы
         PaymentTour::create([
             'user_id' => Auth::id(),
@@ -54,7 +59,7 @@ class PaymentTourController extends Controller
             'status' => 'pending',
             'amount' => $amount,
             'currency' => config('paypal.currency', 'USD'),
-            'paypal_response' => $order,
+            'paypal_response' => json_encode($order),
         ]);
 
         // PayPal сілтемесіне бағыттау
@@ -64,7 +69,7 @@ class PaymentTourController extends Controller
             }
         }
 
-        return redirect()->route('bookingTour.index')->with('error', 'PayPal сілтемесін жасау сәтсіз болды.');
+        return redirect()->route('bookings.index')->with('error', 'PayPal сілтемесін жасау сәтсіз болды.');
     }
 
     /**
@@ -79,7 +84,7 @@ class PaymentTourController extends Controller
         $response = $paypal->capturePaymentOrder($request->token);
 
         if (!isset($response['status']) || $response['status'] !== 'COMPLETED') {
-            return redirect()->route('bookingTour.index')->with('error', 'Төлем сәтсіз аяқталды.');
+            return redirect()->route('bookings.index')->with('error', 'Төлем сәтсіз аяқталды.');
         }
 
         // Төлемді табу немесе ең соңғысын қолдану
@@ -107,7 +112,7 @@ class PaymentTourController extends Controller
             }
         }
 
-        return redirect()->route('bookingTour.index')->with('success', 'Оплата сәтті аяқталды!');
+        return redirect()->route('bookings.index')->with('success', 'Оплата сәтті аяқталды!');
     }
 
     /**
@@ -115,24 +120,6 @@ class PaymentTourController extends Controller
      */
     public function cancel()
     {
-        $user = Auth::user();
-        $bookingId = session('booking_id');
-
-        if ($user && $bookingId) {
-            $booking = \App\Models\Booking::where('id', $bookingId)
-                ->where('user_id', $user->id)
-                ->first();
-
-            if ($booking) {
-                $booking->update([
-                    'status' => 'cancelled',
-                    'is_paid' => false,
-                ]);
-            }
-        }
-
-        return redirect()->route('bookingTour.index')
-            ->with('error', 'Сіз төлемнен бас тарттыңыз. Брондау жойылды.');
+        return redirect()->route('bookings.index')->with('error', 'Сіз төлемнен бас тарттыңыз.');
     }
-
 }

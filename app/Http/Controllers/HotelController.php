@@ -38,7 +38,7 @@ class HotelController extends Controller
             'city' => 'required|string|max:255',
             'country' => 'required|string|max:255',
             'description' => 'required|string',
-            'stars' => 'required|integer|min:1|max:5',
+            'stars' => 'numeric|min:1|max:5',
             'price_per_night' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'room_types' => 'required|array|min:1',

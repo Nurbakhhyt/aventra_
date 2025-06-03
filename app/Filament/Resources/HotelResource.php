@@ -16,8 +16,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Table;
 use Filament\Tables;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Database\Eloquent\Model;
 
 class HotelResource extends Resource
 {
@@ -31,20 +29,25 @@ class HotelResource extends Resource
             ->schema([
                 Section::make('Қонақ үй бойынша ақпарат')
                     ->schema([
-                        TextInput::make('name_kz')->required()->maxLength(255),
-                        TextInput::make('name_en')->required()->maxLength(255),
-                        TextInput::make('address_kz')->required()->maxLength(255),
-                        TextInput::make('address_en')->required()->maxLength(255),
-                        Select::make('city_id')->label('Қала')->relationship('city','name_en')
-                        ->searchable()
-                        ->preload()
-                        ->required(),
+                        TextInput::make('name')->label('Атауы')->required()->maxLength(255),
+                        TextInput::make('address_kz')->label('Мекенжай (қаз)')->nullable()->maxLength(255),
+                        TextInput::make('address_en')->label('Address (eng)')->nullable()->maxLength(255),
+                        Select::make('city_id')->label('Қала')->relationship('city', 'name_en')
+                            ->searchable()
+                            ->preload()
+                            ->required(),
                         TextInput::make('country')->required()->maxLength(255),
-                        Textarea::make('description_kz')->required(),
-                        Textarea::make('description_en')->required(),
-                        TextInput::make('stars')->numeric()->minValue(1)->maxValue(5)->required(),
-                        TextInput::make('price_per_night')->numeric()->minValue(0)->required(),
-                        FileUpload::make('image')->image()->directory('hotels')->maxSize(2048),
+                        Textarea::make('description_kz')->label('Сипаттамасы (қаз)')->nullable(),
+                        Textarea::make('description_en')->label('Description (eng)')->nullable(),
+                        TextInput::make('stars')->numeric()->minValue(1)->maxValue(5)->required(), // ✅ Дұрыс
+                        TextInput::make('rating')->numeric()->step(0.1)->default(0.0), // ✅ Дұрыс
+                        TextInput::make('price_per_night')->numeric()->minValue(1)->required(),// ✅ Түзету керек болды
+
+                        TextInput::make('phone')->label('Телефон')->nullable(),
+                        TextInput::make('email')->email()->label('Email')->nullable(),
+                        TextInput::make('website')->label('Сайт')->nullable()->url(),
+                        FileUpload::make('image')->image()->directory('hotels')->maxSize(2048)->label('Сурет'),
+                        Toggle::make('is_active')->label('Белсенді ме')->default(true),
                     ]),
 
                 Section::make('Бөлме түрлері')
@@ -77,16 +80,16 @@ class HotelResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name_kz')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('name_en')->sortable()->searchable(),
-                Tables\Columns\TextColumn::make('city.name_en')
-                    ->label('Қалалар')
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('country'),
-                Tables\Columns\TextColumn::make('stars'),
-                Tables\Columns\TextColumn::make('price_per_night')->money('KZT'),
-                Tables\Columns\ImageColumn::make('image'),
+                Tables\Columns\TextColumn::make('name')->label('Қонақ үй')->sortable()->searchable(),
+                Tables\Columns\TextColumn::make('city.name_en')->label('Қала')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('country')->label('Ел'),
+                Tables\Columns\TextColumn::make('stars')->label('★'),
+                Tables\Columns\TextColumn::make('rating')->label('Рейтинг'),
+                Tables\Columns\TextColumn::make('price_per_night')->label('Бағасы')->money('KZT'),
+                Tables\Columns\TextColumn::make('phone'),
+                Tables\Columns\TextColumn::make('email'),
+                Tables\Columns\ToggleColumn::make('is_active')->label('Белсенді'),
+                Tables\Columns\ImageColumn::make('image')->label('Сурет'),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),

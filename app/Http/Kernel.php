@@ -43,8 +43,8 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\LangMiddleware::class,
-            // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class, // Осы жолды алып тастаңыз
+//             \App\Http\Middleware\LangMiddleware::class,
+            // \Laravel\Sanctum\Http\Middleware\EnsureFron  tendRequestsAreStateful::class, // Осы жолды алып тастаңыз
         ],
 
     ];
