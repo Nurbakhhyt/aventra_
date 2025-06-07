@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoriteTourController;
 use App\Http\Controllers\HotelController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\PaymentHotelController;
+use App\Http\Controllers\PaymentTourController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
@@ -113,17 +114,28 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/bookings/{booking}/pay', [PaymentHotelController::class, 'create'])->name('payments.create');
     Route::get('/bookings/{booking}/pay/success', [PaymentHotelController::class, 'success'])->name('payments.success');
     Route::get('/bookings/{booking}/pay/cancel', [PaymentHotelController::class, 'cancel'])->name('payments.cancel');
+    Route::post('/bookings/{booking}/payment/success', [PaymentHotelController::class, 'handleFrontendPaymentSuccess']); // 👈 Бұл жол түсініктемеге алынған!
+
+    Route::post('/bookings_tours', [BookingController::class, 'store'])->name('bookings.tour.store'); // Тур брондауды сақтау
+    Route::get('/bookings_tours/user', [BookingController::class, 'userBookings'])->name('bookings.tour.user'); // Қолданушының тур брондаулары
+    Route::get('/bookings_tours/{booking}', [BookingController::class, 'show'])->name('bookings.tour.show'); // Тур брондау деталын көрсету
+    Route::delete('/bookings_tours/{booking}', [BookingController::class, 'destroy'])->name('bookings.tour.destroy'); // Тур брондауды жою
+
+    // ✅ ТУР ТӨЛЕМ МАРШРУТЫ (PayPalButtons Frontend үшін)
+    Route::post('/bookings_tours/{booking}/payment/success', [PaymentTourController::class, 'handleFrontendPaymentSuccess'])->name('payments.tour.success'); // Тур төлемі
+
+    Route::get('/paypal/success/tour', [PaymentTourController::class, 'success'])->name('paypal.success.tour');
+    Route::get('/paypal/cancel/tour', [PaymentTourController::class, 'cancel'])->name('paypal.cancel.tour');
 
 
-
-    //payments route for tour
-   Route::get('/paypal/pay/{booking}', [PaymentTourController::class, 'pay'])->name('paypal.pay');
-   Route::get('/paypal/success', [PaymentTourController::class, 'success'])->name('paypal.success');
-   Route::get('/paypal/cancel', [PaymentTourController::class, 'cancel'])->name('paypal.cancel');
-   Route::get('/bookings/tourCreate', [BookingController::class, 'tourCreate'])->name('bookingsTour.create');
-   Route::post('/bookings_tours', [BookingController::class, 'store'])->name('bookings.store');
-   Route::get('/booking_tours', [BookingController::class, 'index'])->name('bookingTour.index');
-   Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
+//     //payments route for tour
+//    Route::get('/paypal/pay/{booking}', [PaymentTourController::class, 'pay'])->name('paypal.pay');
+//    Route::get('/paypal/success', [PaymentTourController::class, 'success'])->name('paypal.success');
+//    Route::get('/paypal/cancel', [PaymentTourController::class, 'cancel'])->name('paypal.cancel');
+//    Route::get('/bookings/tourCreate', [BookingController::class, 'tourCreate'])->name('bookingsTour.create');
+//    Route::post('/bookings_tours', [BookingController::class, 'store'])->name('bookings.store');
+//    Route::get('/booking_tours', [BookingController::class, 'index'])->name('bookingTour.index');
+//    Route::delete('/bookings/{booking}', [BookingController::class, 'destroy'])->name('bookings.destroy');
 //
 
 });
