@@ -40,6 +40,10 @@ class BookingTour extends Model
         return $this->belongsTo(Tour::class);
     }
 
+    public function payment(){
+            return $this->hasOne(PaymentTour::class);
+    }
+
     // Статус жаңартылғанда is_paid өрісін де жаңарту логикасы (Booking моделіндегідей)
     public function setStatusAttribute($value)
     {

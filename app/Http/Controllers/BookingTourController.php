@@ -106,6 +106,8 @@ class BookingController extends Controller
                 return response()->json(['success' => false, 'message' => 'Баға сәйкес келмейді. Қайта тексеріңіз.'], 400);
             }
 
+            $expiresAt = now()->addMinutes(15);
+
             // Бронь жасау (BookingTour моделін қолданамыз)
             $booking = BookingTour::create([
                 'user_id' => $user->id,

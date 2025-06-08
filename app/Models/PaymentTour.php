@@ -28,7 +28,7 @@ class PaymentTour extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function booking() {
-        return $this->belongsTo(Booking::class, 'booking_id');
+    public function bookingTour() {
+        return $this->belongsTo(BookingTour::class, 'booking_id');
     }
 }

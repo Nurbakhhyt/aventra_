@@ -38,6 +38,11 @@ class Tour extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function bookingTours()
+    {
+        return $this->hasMany(BookingTour::class);
+    }
+
     public function images()
     {
         return $this->hasMany(TourImage::class);

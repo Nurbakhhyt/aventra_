@@ -6,37 +6,26 @@ use Illuminate\Console\Command;
 
 class CancelExpiredBookings extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
     protected $signature = 'bookings:cancel-expired';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
     protected $description = 'Уақыты өткен брондарды автоматты түрде өшіреді';
 
-    /**
-     * Execute the console command.
-     */
+
     public function handle()
     {
-         $expiredBookings = Booking::where('is_paid', false)
-                    ->where('status', 'pending')
-                    ->where('expires_at', '<', Carbon::now())
-                    ->get();
+         $expiredBookings = BookingTour::where('status', 'pending') // Тек күту жағдайындағы броньдар
+                 ->where('expires_at', '<', Carbon::now()) // Қазіргі уақыттан ертерек
+                 ->where('is_paid', false) // Төленбеген
+                 ->get();
 
-                foreach ($expiredBookings as $booking) {
-                    $booking->update([
-                        'status' => 'cancelled'
-                    ]);
-                    $this->info("Booking #{$booking->id} cancelled.");
-                }
+             foreach ($expiredBookings as $booking) {
+                 $booking->update([
+                     'status' => 'cancelled',
+                     'payment_status' => 'unpaid',
+                 ]);
 
-                $this->info('Авто-отмена завершена.');
+                 $this->info("Бронь #{$booking->id} жойылды.");
+             }
+
+             $this->info('Барлық мерзімі өткен броньдар өшірілді.');
     }
 }

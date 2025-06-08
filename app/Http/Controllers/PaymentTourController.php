@@ -264,4 +264,41 @@ class PaymentTourController extends Controller
             return response()->json(['success' => false, 'message' => $errorMessage], 500);
         }
     }
+
+
+    public function getUserPayments(Request $request)
+    {
+        $user = Auth::user();
+
+        // Проверяем, авторизован ли пользователь
+        if (!$user) {
+            return response()->json(['success' => false, 'message' => 'Пользователь не авторизован.'], 401);
+        }
+
+        // Получаем все успешные платежи пользователя
+        $payments = PaymentTour::where('user_id', $user->id)
+            ->where('status', 'approved')  // Учитываем только успешные платежи
+            ->with(['bookingTour', 'bookingTour.tour'])  // Загружаем связанные бронь и тур
+            ->get();
+
+        // Формируем чек (или отчет) с данными
+        $receipts = $payments->map(function ($payment) {
+            return [
+                'payment_id' => $payment->payment_id,
+                'tour_name_kz' => $payment->bookingTour->tour->name_kz,
+                'tour_name_en' => $payment->bookingTour->tour->name_en,
+                'tour_date' => $payment->bookingTour->tour->date,
+                'amount' => $payment->amount,
+                'currency' => $payment->currency,
+                'payment_date' => $payment->created_at->format('Y-m-d H:i:s'),
+                'status' => $payment->status,
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'payments' => $receipts
+        ]);
+    }
+
 }
