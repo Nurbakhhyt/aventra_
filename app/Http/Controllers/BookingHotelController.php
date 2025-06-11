@@ -222,18 +222,21 @@ class BookingHotelController extends Controller
      */
     public function userBookings($userId)
     {
-        $userId = Auth::id(); // Авторизацияланған қолданушының ID-сі
+        $userId = Auth::id();
 
         if (!$userId) {
             return response()->json(['error' => 'User not authenticated'], 401);
         }
 
+        // Тек төленген қонақүй броньдары
         $bookings = BookingHotel::where('user_id', $userId)
-            ->with(['hotel', 'room', 'payments'])
+            ->whereIn('status', ['paid', 'confirmed']) // ✅ тек төленгендер
+            ->with(['hotel', 'roomType', 'payments'])
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
         return response()->json([
-            'booking' => $bookings,
+            'bookings' => $bookings,
         ]);
     }
 

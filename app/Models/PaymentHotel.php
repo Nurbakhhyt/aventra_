@@ -27,4 +27,11 @@ class PaymentHotel extends Model
     {
         return $this->belongsTo(BookingHotel::class);
     }
+
+    public function roomType() // ✅ roomType қатынасы
+        {
+            return $this->belongsTo(RoomType::class); // RoomType моделін импорттау керек
+        }
+
+
 }

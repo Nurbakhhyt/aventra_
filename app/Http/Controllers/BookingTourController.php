@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-// use App\Models\Booking; // ✅ ЕСКЕРТУ: Егер бұл Booking моделі BookingHotel-мен ғана байланысты болса, бұл жолды өшіріңіз немесе BookingHotel деп өзгертіңіз
-use App\Models\BookingTour; // ✅ Жаңа BookingTour моделін импорттау
+// use App\Models\Booking;
+use App\Models\BookingTour;
 use App\Models\Tour;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -49,7 +49,7 @@ class BookingController extends Controller
         ]);
     }
 
-    // Жаңа тур брондауды сақтау
+
     public function store(Request $request)
     {
         Log::info('BookingController@store for Tour called', ['request_payload' => $request->all()]);

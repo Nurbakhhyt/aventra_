@@ -209,6 +209,58 @@ class PaymentHotelController extends Controller
             }
         }
 
+    public function userBookings($userId): JsonResponse
+        {
+            $user = Auth::user();
+
+            if (!$user || $user->id != $userId) {
+                Log::warning('Unauthorized attempt to view hotel bookings', ['user_id' => $user ? $user->id : 'guest', 'requested_user_id' => $userId]);
+                return response()->json(['message' => 'Unauthorized or User ID mismatch.'], 403);
+            }
+
+            try {
+                // ✅ 'room' орнына 'roomType' қатынасын жүктеу
+                // Hotel моделінің ішінде 'location' қатынасы бар болса, оны да жүктеу
+                $bookings = BookingHotel::with([
+                        'hotel.location', // Отельдің локациясын жүктеу
+                        'roomType',       // ✅ room орнына roomType қатынасын жүктеу
+                    ])
+                    ->where('user_id', $user->id)
+                    ->latest()
+                    ->get(); // ✅ paginate(10) орнына get()
+
+                Log::info('Fetched hotel bookings successfully', ['user_id' => $userId, 'booking_count' => $bookings->count()]);
+                return response()->json(['bookings' => $bookings], 200);
+
+            } catch (\Exception $e) {
+                Log::error('Error fetching user hotel bookings', [
+                    'user_id' => $userId,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                return response()->json(['message' => 'Failed to load hotel bookings.', 'details' => $e->getMessage()], 500);
+            }
+        }
+
+    public function userPaidTours()
+    {
+        $userId = Auth::id();
+
+        if (!$userId) {
+            return response()->json(['error' => 'User not authenticated'], 401);
+        }
+
+        $bookings = BookingTour::where('user_id', $userId)
+            ->whereIn('status', ['paid', 'confirmed']) // ✅ тек төленгендер
+            ->with(['tour', 'tour.location'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json([
+            'bookings' => $bookings,
+        ]);
+    }
+
     public function cancel(BookingHotel $booking)
     {
         Log::info('Payment cancelled for booking: ' . $booking->id);

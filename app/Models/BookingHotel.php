@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\RoomType;
 
 class BookingHotel extends Model
 {
@@ -38,11 +39,6 @@ class BookingHotel extends Model
         return $this->belongsTo(Hotel::class);
     }
 
-    public function roomType()
-    {
-        return $this->belongsTo(RoomType::class);
-    }
-
     public function payments()
     {
         return $this->hasMany(PaymentHotel::class, 'booking_id');
@@ -67,5 +63,10 @@ class BookingHotel extends Model
     public function isCancelled()
     {
         return $this->status === 'cancelled';
+    }
+
+    public function roomType()
+    {
+        return $this->belongsTo(RoomType::class, 'room_type_id');
     }
 }
